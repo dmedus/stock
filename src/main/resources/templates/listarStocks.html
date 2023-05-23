@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">
+					<a th:href="@{/form}" class="btn btn-primary">Agregar Stock</a>
+					<a th:href="@{/listarModelos}" class="btn btn-info">Lista Modelos</a>	
+					<a th:href="@{/listarVentas}" class="btn btn-info">Lista Ventas</a>					
+				</h4>
+				
+				<br> 
+				<form class="form-inline">
+					<div class="form-group mb-2">
+						<label>Filtrar :</label>
+					</div>
+					<div class="form-group mx-sm-3 mb-2">
+						<input type="text" name="palabraClave" class="form-control" id="palabraClave" th:value="${palabraClave}"
+							placeholder="Valor a buscar" />
+					</div>
+					<input type="submit" value="Buscar" class="btn btn-primary mb-2">
+					&nbsp; &nbsp;
+					<label><input type="checkbox" name="enStock" id="enStock" value="1" /> sin stock</label><br>
+				</form>				
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Modelo</th>
+							<th>Cond</th>
+							<th>IMEI</th>
+							<th>Proveedor</th>
+							<th>Costo</th>
+							<th>Tipo</th>
+							<th>Stock</th>
+							<th>Fecha</th>
+							<th>Lugar</th>
+							<th>Observacion</th>
+							<th sec:authorize="hasRole('ADMIN')">Editar</th>
+							<th sec:authorize="hasRole('ADMIN')">Vender</th>
+							<th sec:authorize="hasRole('ADMIN')">Eliminar</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="stock : ${stocks}">
+							<td th:text="${stock.id}"></td>
+							<td th:text="${stock.modelo.nombre}"></td>
+							<td th:text="${stock.cond}"></td>
+							<td th:text="${stock.imei}"></td>
+							<td th:text="${stock.proveedor}"></td>
+							<td th:text="${stock.costo}"></td>
+							<td th:text="${stock.tipoCosto}"></td>
+							<td th:text="${stock.inStock}"></td>
+							<td th:text="${stock.fecha}"></td>
+							<td th:text="${stock.lugar}"></td>
+							<td th:text="${stock.observacion}"></td>
+							<td sec:authorize="hasRole('ADMIN')"><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/form/} + ${stock.id}">Editar</a></td>
+							<td sec:authorize="hasRole('ADMIN')"><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/ventaForm/} + ${stock.id}">Vender</a></td>
+							<td sec:authorize="hasRole('ADMIN')"><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminar/} + ${stock.id}"
+								onclick="return confirm('¿Estás seguro de eliminar al stock?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+				</table>
+				<nav th:replace="paginator-nav :: paginator"></nav>
+				
+				<br> 
+				
+				<div  style="float: right">
+				<a sec:authorize="hasRole('ADMIN')" th:href="@{/exportarPDF}" class="btn btn-secondary">Exportar a PDF</a> 
+				&nbsp; &nbsp;
+				<a sec:authorize="hasRole('ADMIN')" th:href="@{/exportarExcel}" class="btn btn-success" >Exportar a Excel</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				
+				<br>
+				
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>							
+							<th>Modelo</th>
+							<th>IMEI</th>
+							<th>Cliente</th>
+							<th>Fecha</th>							
+							<th>Costo</th>
+							<th>Venta</th>
+							<th>Ganacia</th>
+							<th>Usuario</th>
+							<th>Observacion</th>
+							<th>Editar</th>
+							<th>Eliminar</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="venta : ${listarVentas}">
+							<td th:text="${venta.id}"></td>
+							<td th:text="${venta.modelo.nombre}"></td>
+							<td th:text="${venta.imei}"></td>
+							<td th:text="${venta.cliente}"></td>
+							<td th:text="${venta.fecha}"></td>
+							<td th:text="${venta.costo}"></td>
+							<td th:text="${venta.venta}"></td>
+							<td th:text="${venta.ganancia}"></td>
+							<td th:text="${venta.usuario}"></td>
+							<td th:text="${venta.observacion}"></td>
+							<td><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/ventaForm/} + ${venta.id}">Editar</a></td>
+							<td><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminarVenta/} + ${venta.id}"
+								onclick="return confirm('¿Estás seguro de eliminar la venta?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

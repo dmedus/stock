@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+	
+	<br>
+	
+	<div class="container">
+	   <div class="row">
+	      <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+	           <h1 class="text-center" th:text="${titulo}"></h1>
+	           <div class="card-body">
+				   <h4 style="color: forestgreen" th:text="${stock.modelo.nombre}">Modelo</h4>
+				   <h4 style="color: forestgreen" th:text="Imei +' '+${stock.imei}">Imei</h4>
+	              <form th:action="@{/ventaForm/} + ${stock.id}" th:object="${venta}" method="post">
+	                <input type="hidden" th:field="*{id}" th:value="${venta.id}"/>
+	                 <div class="form-group">
+	                    <label>Cliente : </label>
+	                    <input type="text" th:field="*{cliente}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('cliente')}" th:errors="*{cliente}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Moto : </label>
+	                    <select class="form-control" th:field="*{moto}">
+	                        <option th:value='CHAMPION'>CHAMPION</option>
+	                        <option th:value='ROMAN'>ROMAN</option>
+	                        <option th:value='MARITO'>MARITO</option>
+	                        <option th:value='OTRO'>OTRO</option>	             
+	                    </select>
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Venta : </label>
+	                    <input type="number" th:field="*{venta}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('venta')}" th:errors="*{venta}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Tipo : </label>
+	                    <select class="form-control" th:field="*{tipoVenta}">
+	                        <option th:value='USD'>USD</option>
+	                        <option th:value='PESOS'>PESOS</option>           
+	                    </select>
+	                 </div>		  
+	                 <div class="form-group">
+	                    <label>Fecha : </label>
+	                    <input type="date" th:field="*{fecha}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Lugar : </label>
+	                    <select class="form-control" th:field="*{lugar}">
+	                        <option th:value='Izone'>Izone</option>
+	                        <option th:value='otro'>otro</option>
+	                    </select>
+	                 </div> 
+	                 <div class="form-group">
+	                    <label>Observacion : </label>
+	                    <textarea  type="text" th:field="*{observacion}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}"></small> 
+	                 </div>
+	                 
+	                 <div class="box-footer"> 
+	                     <input type="submit" value="Guardar" class="btn btn-primary">
+	                 </div>
+	              </form>
+	           </div>
+	      </div>
+	   </div>
+	</div>
+	
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>
