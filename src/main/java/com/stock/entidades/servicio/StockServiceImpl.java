@@ -1,5 +1,6 @@
 package com.stock.entidades.servicio;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +20,10 @@ public class StockServiceImpl implements StockService{
 	
 	@Override
 	@Transactional(readOnly = true)
-	public List<Stock> findAll(String palabraClave) {
-		if (palabraClave != null) {
-			return stockRepository.findAll(palabraClave);
-		}
-		return stockRepository.findAll();
-		
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public Page<Stock> finAll(Pageable pageable) {
 		return stockRepository.findAll(pageable);
 	}
+
 
 	@Override
 	@Transactional
@@ -53,9 +45,26 @@ public class StockServiceImpl implements StockService{
 	}
 
 	@Override
-	public Page<Stock> findAllPage(String palabraClave,boolean inStock, Pageable pageable) {
-		return stockRepository.findAllPage(palabraClave,inStock, pageable);
+	public Page<Stock> findAllPage(String palabraClave,boolean inStock, Date fecha,Date fecha2, Pageable pageable) {
+		return stockRepository.findAllPage(palabraClave,inStock,fecha,fecha2,pageable);
 	}
+
+
+	@Override
+	public List<Stock> findAll() {
+		return stockRepository.findAll();
+	}
+
+
+	@Override
+	public Page<Stock> findBypalabraClave(String palabraClave, boolean inStock, Pageable pageable) {
+		return stockRepository.findBypalabraClave(palabraClave,inStock,pageable);
+	}
+
+
+	
+	
+	
 	
 	
 

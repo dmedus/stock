@@ -1,8 +1,13 @@
 package com.stock.controlador;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +21,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.lowagie.text.DocumentException;
 import com.stock.entidades.Modelo;
 import com.stock.entidades.Stock;
 import com.stock.entidades.Venta;
 import com.stock.entidades.servicio.StockService;
 import com.stock.entidades.servicio.VentaService;
 import com.stock.repositorio.ModeloRepository;
+import com.stock.utils.reporte.VentaExporterExcel;
 
 
 
@@ -126,5 +133,22 @@ public class VentaControlador {
 		return "redirect:/listarVentas";
 	}
 	
+	@GetMapping("/ventaExportarExcel")
+	public void exportarListadoDeEmpleadosEnExcel(HttpServletResponse response) throws DocumentException, IOException {
+		response.setContentType("application/octet-stream");
+		
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		String fechaActual = dateFormatter.format(new Date());
+		
+		String cabecera = "Content-Disposition";
+		String valor = "attachment; filename=Venta_" + fechaActual + ".xlsx";
+		
+		response.setHeader(cabecera, valor);
+		
+		List<Venta> venta = service.findAll();
+		
+		VentaExporterExcel exporter = new VentaExporterExcel(venta);
+		exporter.exportar(response);
+	}
 	
 }

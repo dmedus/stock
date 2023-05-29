@@ -14,19 +14,19 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.stock.entidades.Stock;
+import com.stock.entidades.Venta;
 
-public class StockExporterExcel {
+public class VentaExporterExcel {
 
 	private XSSFWorkbook libro;
 	private XSSFSheet hoja;
 
-	private List<Stock> listaStock;
+	private List<Venta> listaVenta;
 
-	public StockExporterExcel(List<Stock> listaStock) {
-		this.listaStock = listaStock;
+	public VentaExporterExcel(List<Venta> listaVenta) {
+		this.listaVenta = listaVenta;
 		libro = new XSSFWorkbook();
-		hoja = libro.createSheet("Stock");
+		hoja = libro.createSheet("Venta");
 	}
 
 	private void escribirCabeceraDeTabla() {
@@ -41,23 +41,21 @@ public class StockExporterExcel {
 		Cell celda = fila.createCell(0);
 		celda.setCellValue("ID");
 		celda.setCellStyle(estilo);
-		
-		//terminar
-		
+			
 		celda = fila.createCell(1);
 		celda.setCellValue("Modelo");
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(2);
-		celda.setCellValue("Cond");
-		celda.setCellStyle(estilo);
-		
-		celda = fila.createCell(3);
 		celda.setCellValue("IMEI");
 		celda.setCellStyle(estilo);
 		
+		celda = fila.createCell(3);
+		celda.setCellValue("Cliente");
+		celda.setCellStyle(estilo);
+		
 		celda = fila.createCell(4);
-		celda.setCellValue("Proveedor");
+		celda.setCellValue("Fecha");
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(5);
@@ -65,24 +63,21 @@ public class StockExporterExcel {
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(6);
-		celda.setCellValue("Tipo");
+		celda.setCellValue("Venta");
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(7);
-		celda.setCellValue("Stock");
+		celda.setCellValue("Ganacia");
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(8);
-		celda.setCellValue("Fecha");
+		celda.setCellValue("Usuario");
 		celda.setCellStyle(estilo);
 		
 		celda = fila.createCell(9);
-		celda.setCellValue("Lugar");
-		celda.setCellStyle(estilo);
-		
-		celda = fila.createCell(10);
 		celda.setCellValue("Observacion");
 		celda.setCellStyle(estilo);
+		
 	}
 	
 	private void escribirDatosDeLaTabla() {
@@ -99,64 +94,59 @@ public class StockExporterExcel {
 		    createHelper.createDataFormat().getFormat("m/d/yy"));
 		cellStyleFecha.setFont(fuente);
 		
-		for(Stock stock : listaStock) {
+		for(Venta venta : listaVenta) {
 			Row fila = hoja.createRow(nueroFilas ++);
 			
 			Cell celda = fila.createCell(0);
-			celda.setCellValue(stock.getId());
+			celda.setCellValue(venta.getId());
 			hoja.autoSizeColumn(0);
 			celda.setCellStyle(estilo);
 			
-			//terminar
 			celda = fila.createCell(1);
-			celda.setCellValue(stock.getModelo().getNombre());
+			celda.setCellValue(venta.getModelo().getNombre());
 			hoja.autoSizeColumn(1);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(2);
-			celda.setCellValue(stock.getCond());
+			celda.setCellValue(venta.getImei());
 			hoja.autoSizeColumn(2);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(3);
-			celda.setCellValue(stock.getImei());
+			celda.setCellValue(venta.getCliente());
 			hoja.autoSizeColumn(3);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(4);
-			celda.setCellValue(stock.getProveedor());
+			celda.setCellValue(venta.getFecha());
 			hoja.autoSizeColumn(4);
-			celda.setCellStyle(estilo);
+			celda.setCellStyle(cellStyleFecha);
 			
 			celda = fila.createCell(5);
-			celda.setCellValue(stock.getCosto());
+			celda.setCellValue(venta.getCosto());
 			hoja.autoSizeColumn(5);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(6);
-			celda.setCellValue(stock.getTipoCosto());
+			celda.setCellValue(venta.getVenta());
 			hoja.autoSizeColumn(6);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(7);
-			celda.setCellValue(stock.isInStock());
+			celda.setCellValue(venta.getGanancia());
 			hoja.autoSizeColumn(7);
 			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(8);
-			celda.setCellValue(stock.getFecha());
+			celda.setCellValue(venta.getUsuario());
 			hoja.autoSizeColumn(8);
-			celda.setCellStyle(cellStyleFecha);
+			celda.setCellStyle(estilo);
 			
 			celda = fila.createCell(9);
-			celda.setCellValue(stock.getLugar());
+			celda.setCellValue(venta.getObservacion());
 			hoja.autoSizeColumn(9);
 			celda.setCellStyle(estilo);
-			
-			celda = fila.createCell(10);
-			celda.setCellValue(stock.getObservacion());
-			hoja.autoSizeColumn(10);
-			celda.setCellStyle(estilo);
+
 		}
 	}
 	

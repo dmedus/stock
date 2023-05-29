@@ -2,7 +2,9 @@ package com.stock.controlador;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,7 +36,6 @@ import com.stock.entidades.servicio.StockService;
 import com.stock.repositorio.ModeloRepository;
 import com.stock.utils.paginacion.PageRender;
 import com.stock.utils.reporte.StockExporterExcel;
-import com.stock.utils.reporte.StockExporterPDF;
 
 
 
@@ -60,24 +62,49 @@ public class StockControlador {
 	}
 	
 	
-	@GetMapping({"/","/listarStocks",""})
-	public String ListarStocks(@RequestParam(name = "page", defaultValue = "0") int page, Model modelo,@Param("palabraClave") String palabraClave,@Param("enStock") String enStock) {
-		if (palabraClave ==  null) {
-			palabraClave = "";
-		}
-		
+	@GetMapping({ "/", "/listarStocks", "" })
+	public String ListarStocks(@RequestParam(name ="page", defaultValue = "0") int page, Model modelo,
+			@RequestParam(name ="palabraClave",defaultValue = "") String palabraClave, 
+			@Param("enStock") String enStock,
+			@Param("fechaDesde") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaDesde, 
+			@Param("fechaHasta") @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaHasta) {
+
 		boolean inStock = true;
-		if (enStock !=  null) {
-			 inStock = false;
+		if (enStock != null) {
+			inStock = false;
 		}
-				
-		Pageable pageRequest = PageRequest.of(page, 5);
-		Page<Stock> stocks = service.findAllPage(palabraClave,inStock,pageRequest);
-		PageRender<Stock> pageRender = new PageRender<>("/listarStocks", stocks);
 		
-		modelo.addAttribute("titulo","Listado de Stock");
-		modelo.addAttribute("stocks",stocks);
-		modelo.addAttribute("page",pageRender);
+		if (fechaDesde == null && fechaHasta == null) {
+			
+			try {
+				SimpleDateFormat fechaF = new SimpleDateFormat("yyyy-MM-dd");
+				fechaHasta = fechaF.parse(fechaF.format(new Date()));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			
+			Calendar c= Calendar.getInstance();
+			c.add(Calendar.DATE, -30);
+			Date fecha30 =c.getTime();
+			
+			try {
+				SimpleDateFormat fechaF = new SimpleDateFormat("yyyy-MM-dd");
+				fechaDesde = fechaF.parse(fechaF.format(fecha30));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+
+		Pageable pageRequest = PageRequest.of(page, 5);
+		
+		Page<Stock> stocks = service.findAllPage(palabraClave, inStock, fechaDesde,fechaHasta,pageRequest);
+		
+		
+		PageRender<Stock> pageRender = new PageRender<>("/listarStocks", stocks);
+
+		modelo.addAttribute("titulo", "Listado de Stock");
+		modelo.addAttribute("stocks", stocks);
+		modelo.addAttribute("page", pageRender);
 		return "listarStocks";
 	}
 	
@@ -144,25 +171,6 @@ public class StockControlador {
 		return "redirect:/listarStocks";
 	}
 	
-	@GetMapping("/exportarPDF")
-	public void exportarListadoDeEmpleadosEnPDF(HttpServletResponse response) throws DocumentException, IOException {
-		response.setContentType("application/pdf");
-		
-		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-		String fechaActual = dateFormatter.format(new Date());
-		
-		String cabecera = "Content-Disposition";
-		String valor = "attachment; filename=Empleados_" + fechaActual + ".pdf";
-		
-		response.setHeader(cabecera, valor);
-		
-		List<Stock> empleados = service.findAll(null);
-		
-		StockExporterPDF exporter = new StockExporterPDF(empleados);
-		exporter.exportar(response);
-		
-	}
-	
 	@GetMapping("/exportarExcel")
 	public void exportarListadoDeEmpleadosEnExcel(HttpServletResponse response) throws DocumentException, IOException {
 		response.setContentType("application/octet-stream");
@@ -171,11 +179,11 @@ public class StockControlador {
 		String fechaActual = dateFormatter.format(new Date());
 		
 		String cabecera = "Content-Disposition";
-		String valor = "attachment; filename=Empleados_" + fechaActual + ".xlsx";
+		String valor = "attachment; filename=Stock_" + fechaActual + ".xlsx";
 		
 		response.setHeader(cabecera, valor);
 		
-		List<Stock> stock = service.findAll(null);
+		List<Stock> stock = service.findAll();
 		
 		StockExporterExcel exporter = new 	StockExporterExcel(stock);
 		exporter.exportar(response);

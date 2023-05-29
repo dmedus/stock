@@ -96,7 +96,7 @@ public class StockExporterPDF {
 		tabla.setWidthPercentage(100);
 		tabla.setSpacingBefore(15);
 		
-		tabla.setWidths(new float[] { 1f, 2.3f, 2.3f, 6f, 2.9f, 3.5f, 2f, 2.2f });
+		tabla.setWidths(new float[] { 1.5f, 6f, 1.5f, 6f, 3f, 2.5f, 3f, 2.2f,  4f});
 		tabla.setWidthPercentage(110);
 
 		escribirCabeceraDeLaTabla(tabla);
