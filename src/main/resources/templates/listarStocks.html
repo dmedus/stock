@@ -15,10 +15,9 @@
 			<div class="card-body">
 				<h4 class="card-title">
 					<a th:href="@{/form}" class="btn btn-primary">Agregar Stock</a>
-					<a th:href="@{/listarModelos}" class="btn btn-info">Lista Modelos</a>
-					<a th:href="@{/listarVentas}" class="btn btn-info">Lista Ventas</a>
 				</h4>
-
+		<div class="py-4 ml-6 mr-6">
+		<div class="card bg-light">
 				<form>
 					<div class="form-row">
 
@@ -49,7 +48,9 @@
 					</div>
 					<button type="submit" value="Buscar" class="btn btn-primary">Filtrar</button>
 				</form>
-				<br>
+				</div>
+				</div>
+
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -86,7 +87,7 @@
 									th:href="@{/form/} + ${stock.id}">Editar</a></td>
 							<td sec:authorize="hasRole('ADMIN')"><a class="btn btn-warning btn-sm"
 									th:href="@{/ventaForm/} + ${stock.id}">Vender</a></td>
-							<td sec:authorize="hasRole('ADMIN')"><a class="btn btn-danger btn-sm"
+							<td sec:authorize="hasRole('ROLE_ADMIN')"><a class="btn btn-danger btn-sm"
 									th:href="@{/eliminar/} + ${stock.id}"
 									onclick="return confirm('¿Estás seguro de eliminar al stock?');">Eliminar</a></td>
 						</tr>

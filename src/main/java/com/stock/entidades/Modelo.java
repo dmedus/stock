@@ -17,8 +17,8 @@ public class Modelo {
 	private Long id;
 	
 	@Column(nullable = false, unique = true)
-	private String nombre;
-
+	private String nombre;	
+	
 	public Long getId() {
 		return id;
 	}

@@ -27,7 +27,7 @@ public class ModeloControlador {
 	@Autowired
 	private ModeloService service;
 	
-	
+		
 	@GetMapping({"/listarModelos"})
 	public String listarModelos(Model modelo) {		
 		List<Modelo> listModelos = service.findAll();		
