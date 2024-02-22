@@ -73,7 +73,7 @@
 					<tbody>
 						<tr th:each="stock : ${stocks}">
 							<td th:text="${stock.id}"></td>
-							<td th:text="${stock.modelo.nombre}"></td>
+							<td th:text="${stock.modelo.nombre} +' '+ ${stock.modelo.capacidad} +' '+ ${stock.modelo.color}"></td>
 							<td th:text="${stock.cond}"></td>
 							<td th:text="${stock.imei}"></td>
 							<td th:text="${stock.proveedor}"></td>

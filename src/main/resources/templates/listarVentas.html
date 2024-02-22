@@ -24,6 +24,7 @@
 							<th>Costo</th>
 							<th>Venta</th>
 							<th>Ganacia</th>
+							<th>Tipo</th>
 							<th>Usuario</th>
 							<th>Observacion</th>
 							<th>Editar</th>
@@ -33,13 +34,14 @@
 					<tbody>
 						<tr th:each="venta : ${listarVentas}">
 							<td th:text="${venta.id}"></td>
-							<td th:text="${venta.modelo.nombre}"></td>
+							<td th:text="${venta.modelo.nombre} +' '+ ${venta.modelo.capacidad} +' '+ ${venta.modelo.color}"></td>
 							<td th:text="${venta.imei}"></td>
 							<td th:text="${venta.cliente}"></td>
 							<td th:text="${venta.fecha}"></td>
 							<td th:text="${venta.costo}"></td>
 							<td th:text="${venta.venta}"></td>
 							<td th:text="${venta.ganancia}"></td>
+							<td th:text="${venta.tipoVenta}"></td>							
 							<td th:text="${venta.usuario}"></td>
 							<td th:text="${venta.observacion}"></td>
 							<td><a

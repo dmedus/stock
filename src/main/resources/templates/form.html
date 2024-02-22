@@ -19,7 +19,7 @@
 	                 <div class="form-group">
 	                    <label>Modelo : </label>
 						<select class="form-control" th:field="*{modelo.id}">
-							<option th:each="modelo : ${listModelo}" th:text="${modelo.nombre}" th:value="${modelo.id}">
+							<option th:each="modelo : ${listModelo}" th:text="${modelo.nombre} +' '+ ${modelo.capacidad} +' '+ ${modelo.color}" th:value="${modelo.id}">
 						</select>
 	                 </div>	             
 	                 <div class="form-group">

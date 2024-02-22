@@ -21,8 +21,35 @@
 	                    <input type="text" th:field="*{nombre}" class="form-control" th:errorclass="'form-control alert-danger'"/>
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small> 
 	                 </div>
+	                 <div class="form-group">
+	                    <label>Capacidad : </label>
+	                    <select class="form-control" th:field="*{capacidad}">
+	                        <option th:value='64'>64</option>
+	                        <option th:value='128'>128</option>
+	                        <option th:value='256'>256</option>
+	                        <option th:value='512'>512</option>	             
+	                    </select>
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Color : </label>
+	                    <select class="form-control" th:field="*{color}">
+	                        <option th:value='BLACK'>BLACK</option>
+	                        <option th:value='BLUE'>BLUE</option>
+	                        <option th:value='GRAPHITE'>GRAPHITE</option>
+	                        <option th:value='GRAY'>GRAY</option>	
+	                        <option th:value='GREEN'>GREEN</option>	   
+	                        <option th:value='GOLD'>GOLD</option>	   
+	                        <option th:value='MIDNIGHT'>MIDNIGHT</option>	   
+	                        <option th:value='PURPLE'>PURPLE</option>	   
+	                        <option th:value='SILVER'>SILVER</option>	 
+	                        <option th:value='STARLIGHT'>STARLIGHT</option>
+	                        <option th:value='YELLOW'>YELLOW</option>
+	                        <option th:value='WHITE'>WHITE</option>               
+	                    </select>
+	                 </div>
 	                 <div class="box-footer"> 
 	                     <input type="submit" value="Guardar" class="btn btn-primary">
+	                     <a th:href="@{/listarModelos}" class="btn btn-primary">Cancelar</a>
 	                 </div>
 	              </form>
 	           </div>

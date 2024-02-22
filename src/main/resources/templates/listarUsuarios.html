@@ -13,28 +13,34 @@
 			<div class="card-header" th:text="${titulo}"></div>
 			<div class="card-body">
 				<h4 class="card-title">
-					<a th:href="@{/modeloForm}" class="btn btn-primary">Agregar Modelo</a>		
+					<a th:href="@{/usuarioForm}" class="btn btn-primary">Agregar Usuario</a>		
 				</h4>
 								
 				<table class="table table-striped">
 					<thead>
 						<tr>
 							<th>ID</th>
-							<th>Modelo</th>
+							<th>Nombre</th>
+							<th>Apellido</th>
+							<th>Usuario</th>
+							<th>Email</th>
 							<th>Editar</th>
 							<th>Eliminar</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="modelo : ${listModelos}">
-							<td th:text="${modelo.id}"></td>
-							<td th:text="${modelo.nombre} +' '+ ${modelo.capacidad} +' '+ ${modelo.color}"  ></td>
+						<tr th:each="usuario : ${listarUsuarios}">
+							<td th:text="${usuario.id}"></td>
+							<td th:text="${usuario.nombre}"></td>
+							<td th:text="${usuario.apellido}"></td>
+							<td th:text="${usuario.usuario}"></td>
+							<td th:text="${usuario.email}"></td>
 							<td><a
 								class="btn btn-warning btn-sm"
-								th:href="@{/modeloForm/} + ${modelo.id}">Editar</a></td>
+								th:href="@{/usuarioForm/} + ${usuario.id}">Editar</a></td>
 							<td><a
 								class="btn btn-danger btn-sm"
-								th:href="@{/eliminarModelo/} + ${modelo.id}"
+								th:href="@{/eliminarUsuario/} + ${usuario.id}"
 								onclick="return confirm('¿Estás seguro de eliminar el modelo?');">Eliminar</a></td>
 						</tr>
 					</tbody>

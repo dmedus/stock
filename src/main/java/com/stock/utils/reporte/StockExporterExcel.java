@@ -109,7 +109,8 @@ public class StockExporterExcel {
 			
 			//terminar
 			celda = fila.createCell(1);
-			celda.setCellValue(stock.getModelo().getNombre());
+			String modeloCelular = stock.getModelo().getNombre() + " " +stock.getModelo().getCapacidad() + " " +stock.getModelo().getColor();  
+			celda.setCellValue(modeloCelular);
 			hoja.autoSizeColumn(1);
 			celda.setCellStyle(estilo);
 			

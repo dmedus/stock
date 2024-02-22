@@ -19,6 +19,12 @@ public class Modelo {
 	@Column(nullable = false, unique = true)
 	private String nombre;	
 	
+	@Column(nullable = false, unique = true)
+	private String capacidad;	
+	
+	@Column(nullable = false, unique = true)
+	private String color;	
+	
 	public Long getId() {
 		return id;
 	}
@@ -35,19 +41,39 @@ public class Modelo {
 		this.nombre = nombre;
 	}
 
-	public Modelo(Long id, String nombre) {
+	public String getCapacidad() {
+		return capacidad;
+	}
+
+	public void setCapacidad(String capacidad) {
+		this.capacidad = capacidad;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public Modelo(Long id, String nombre, String capacidad , String color) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
+		this.color = color;
+		this.capacidad = capacidad;
 	}
 
 	public Modelo() {
 		super();
 	}
 
-	public Modelo(String nombre) {
+	public Modelo(String nombre, String capacidad , String color) {
 		super();
 		this.nombre = nombre;
+		this.color = color;
+		this.capacidad = capacidad;
 	}
 	
 	
