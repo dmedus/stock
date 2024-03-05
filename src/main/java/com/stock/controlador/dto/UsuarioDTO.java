@@ -1,5 +1,7 @@
 package com.stock.controlador.dto;
 
+import com.stock.utils.reporte.Rol;
+
 public class UsuarioDTO {
 
 	private Long id;
@@ -8,7 +10,8 @@ public class UsuarioDTO {
 	private String nomUsuario;
 	private String email;
 	private String password;
-
+	private Rol rol;
+	
 	public Long getId() {
 		return id;
 	}
@@ -56,12 +59,21 @@ public class UsuarioDTO {
 	public void setUsuario(String usuario) {
 		this.nomUsuario = usuario;
 	}
+	
+
+	public Rol getRol() {
+		return rol;
+	}
+
+	public void setRol(Rol rol) {
+		this.rol = rol;
+	}
 
 	public UsuarioDTO() {
 
 	}
 
-	public UsuarioDTO(Long id, String nombre, String apellido, String usuario, String email, String password) {
+	public UsuarioDTO(Long id, String nombre, String apellido, String usuario, String email, String password, Rol rol) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -69,6 +81,7 @@ public class UsuarioDTO {
 		this.nomUsuario = usuario;
 		this.email = email;
 		this.password = password;
+		this.rol = rol;
 	}
 
 	

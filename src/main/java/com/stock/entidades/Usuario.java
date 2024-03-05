@@ -2,17 +2,16 @@ package com.stock.entidades;
 
 import java.util.Collection;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+
+import org.springframework.security.core.GrantedAuthority;
+
+import com.stock.utils.reporte.Rol;
 
 @Entity
 @Table(name = "usuarios")
@@ -35,13 +34,8 @@ public class Usuario {
 	
 	private String password;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "usuarios_roles",
-			joinColumns = @JoinColumn(name = "usuario_id",referencedColumnName = "id"),
-			inverseJoinColumns =  @JoinColumn(name = "rol_id",referencedColumnName = "id")
-			)
-	private Collection<Rol> roles;
-
+	private Rol rol; 
+	
 	public Long getId() {
 		return id;
 	}
@@ -82,12 +76,12 @@ public class Usuario {
 		this.password = password;
 	}
 
-	public Collection<Rol> getRoles() {
-		return roles;
+	public Rol getRol() {
+		return rol;
 	}
 
-	public void setRoles(Collection<Rol> roles) {
-		this.roles = roles;
+	public void setRol(Rol rol) {
+		this.rol = rol;
 	}
 
 	public String getUsuario() {
@@ -103,7 +97,7 @@ public class Usuario {
 	}
 
 	public Usuario(Long id, String nombre, String apellido, String usuario, String email, String password,
-			Collection<Rol> roles) {
+			Rol rol) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -111,18 +105,18 @@ public class Usuario {
 		this.usuario = usuario;
 		this.email = email;
 		this.password = password;
-		this.roles = roles;
+		this.rol = rol;
 	}
 
 	public Usuario(String nombre, String apellido, String usuario, String email, String password,
-			Collection<Rol> roles) {
+			Rol rol) {
 		super();
 		this.nombre = nombre;
 		this.apellido = apellido;
 		this.usuario = usuario;
 		this.email = email;
 		this.password = password;
-		this.roles = roles;
+		this.rol = rol;
 	}
 	
 	

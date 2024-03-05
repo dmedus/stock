@@ -2,6 +2,8 @@ package com.stock;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.stock.utils.reporte.Rol;
+
 public class PasswordGenerator {
 
 	public static void main(String[] args) {
@@ -11,6 +13,8 @@ public class PasswordGenerator {
 		String encodedPassword = encoder.encode(rawPassword);
 		
 		System.out.println(encodedPassword);
+		
+		
 		
 	}
 	

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.stock.entidades.servicio.UsuarioService;
+import com.stock.utils.reporte.Rol;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +46,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 				"/js/**",
 				"/css/**",
 				"/img/**").permitAll()
+		.antMatchers("/admin/**").hasRole(Rol.ADMIN.getNombre())
+        .antMatchers("/user/**").hasRole(Rol.USER.getNombre())
 		.anyRequest().authenticated()
 		.and()
 		.formLogin()

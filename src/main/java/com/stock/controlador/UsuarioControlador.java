@@ -31,7 +31,7 @@ public class UsuarioControlador {
 	}
 
 	@GetMapping({"/listarUsuarios"})
-	public String listarUsuarios(Model modelo) {		
+	public String listarUsuarios(Model modelo) {
 		List<Usuario> listarUsuarios = usuarioService.listarUsuarios();		
 		
 		modelo.addAttribute("titulo","Listado de Usuario");
@@ -44,7 +44,8 @@ public class UsuarioControlador {
 	public String mostrarFormularioDeUsuario(Map<String,Object> modelo) {
 		Usuario usuario = new Usuario();
 		
-		modelo.put("usuario", usuario);		
+		modelo.put("usuario", usuario);
+		modelo.put("editar",true);
 		modelo.put("titulo", "Registro de Usuario");
 		return "usuarioForm";
 	}
@@ -80,6 +81,7 @@ public class UsuarioControlador {
 		}
 		
 		modelo.put("usuario",usuario);
+		modelo.put("editar",false);
 		modelo.put("titulo", "Edición de stock");
 		return "usuarioForm";
 	}

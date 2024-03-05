@@ -36,11 +36,19 @@
 						<input type="text" th:field="*{email}" class="form-control" th:errorclass="'form-control alert-danger'"/>
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small> 
 	                 </div>
-	                 <div class="form-group">
+	                 <div class="form-group" th:if="${editar}">
 						  <label>Password : </label>
 						<input type="password" th:field="*{password}" class="form-control" th:errorclass="'form-control alert-danger'"/>
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small> 
 					</div>
+					<div class="form-group">
+	                    <label>Rol : </label>
+	                    <select class="form-control" th:field="*{rol}">
+	                        <option th:value='USER'>USER</option>
+	                        <option th:value='ADMIN'>ADMIN</option>
+	                        <option th:value='EDITOR'>EDITOR</option>             
+	                    </select>
+	                 </div>
 	                 
 	                 <div class="box-footer"> 
 	                     <input type="submit" value="Guardar" class="btn btn-primary">
