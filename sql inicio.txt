@@ -40,3 +40,11 @@ INSERT INTO `cliente` (`activo`, `apellido`, `nombre`, `telefono`, `email`, `ciu
 (TRUE, 'Celinski', 'Matias', '1189012345', 'matias.c@example.com', 'Mar del Plata', 'Belgrano 202', 'Argentina', 'Buenos Aires', CURDATE()), -- ID 6
 (TRUE, 'Perez', 'Cris', '1190123456', 'cris.p@example.com', 'Neuquén', 'Roca 303', 'Argentina', 'Neuquén', CURDATE()), -- ID 7
 (TRUE, 'Marco', 'Hernan', '1101234567', 'hernan.m@example.com', 'Tucumán', 'San Martín 404', 'Argentina', 'Tucumán', CURDATE()); -- ID 8
+
+
+INSERT INTO variedades (nombre) VALUES
+('Malbec'),
+('Pinot noir'),
+('Chardonnay'),
+('Cabernet Franc'),
+('Blend');
