@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+	
+	<br>
+	
+	<div class="container">
+	   <div class="row">
+	      <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+	           <h1 class="text-center" th:text="${titulo}"></h1>
+	           <div class="card-body">
+	              <form th:action="@{/vinoForm}" th:object="${vino}" method="post">
+	                 <input type="hidden" th:field="*{id}"/>
+	                 <div class="form-group">
+	                    <label>Nombre : </label>
+						<input type="text" th:field="*{nombre}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small> 
+	                 </div>	             
+	                  <div class="form-group">
+	                    <label>Bodega : </label>
+						<select th:field="*{bodega}" class="form-control">
+							<option th:each="bodega : ${bodegas}" th:value="${bodega.id}" th:text="${bodega.nombre}"></option>
+						</select>
+	                 </div>
+	                  <div class="form-group">
+	                    <label>Variedad : </label>
+						<select th:field="*{variedad}" class="form-control">
+							<option th:each="variedad : ${variedades}" th:value="${variedad.id}" th:text="${variedad.nombre}"></option>
+						</select>
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Año Cosecha : </label>
+						<input type="number" th:field="*{anioCosecha}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('anioCosecha')}" th:errors="*{anioCosecha}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Descripción : </label>
+						<textarea th:field="*{descripcion}" class="form-control" th:errorclass="'form-control alert-danger'"></textarea>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Stock Mínimo : </label>
+						<input type="number" th:field="*{stockMinimo}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></small> 
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Cantidad Vinos por Caja : </label>
+						<input type="number" th:field="*{cantVinosxcaja}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('cantVinosxcaja')}" th:errors="*{cantVinosxcaja}"></small> 
+	                 </div>
+	
+	                 <div class="form-group">
+	                    <label>Imagen URL : </label>
+						<input type="text" th:field="*{imagenUrl}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('imagenUrl')}" th:errors="*{imagenUrl}"></small> 
+	                 </div>
+	                 <div class="form-group form-check">
+	                    <input type="checkbox" th:field="*{activo}" class="form-check-input"/>
+	                    <label class="form-check-label">Activo</label>
+	                 </div>
+	                 
+	                 <div class="box-footer"> 
+	                     <input type="submit" value="Guardar" class="btn btn-primary">
+	                     <a th:href="@{/listarVinos}" class="btn btn-primary">Cancelar</a>
+	                 </div>
+	              </form>
+	           </div>
+	      </div>
+	   </div>
+	</div>
+	
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

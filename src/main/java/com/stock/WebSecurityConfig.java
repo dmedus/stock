@@ -15,24 +15,40 @@ import com.stock.entidades.servicio.UsuarioService;
 import com.stock.utils.reporte.Rol;
 
 @Configuration
+
 @EnableWebSecurity
+
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 
+
+
 	@Autowired
+
 	private UsuarioService usuarioServicio;
+
+
+
+	@Autowired
+
+	private BCryptPasswordEncoder passwordEncoder;
+
 	
+
 	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-	
-	@Bean
+
 	public DaoAuthenticationProvider authenticationProvider() {
+
 		DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+
 		auth.setUserDetailsService(usuarioServicio);
-		auth.setPasswordEncoder(passwordEncoder());
+
+		auth.setPasswordEncoder(passwordEncoder);
+
 		return auth;
+
 	}
+
+
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -48,11 +64,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 				"/img/**").permitAll()
 		.antMatchers("/admin/**").hasRole(Rol.ADMIN.getNombre())
         .antMatchers("/user/**").hasRole(Rol.USER.getNombre())
+		.antMatchers("/listarPedidos", "/listarPedidoDetalles", "/verPedidoDetalles/**").hasAnyRole(Rol.USER.getNombre(), Rol.ADMIN.getNombre())
+		.antMatchers("/pedidoForm/**", "/eliminarPedido/**", "/confirmarPedido/**", "/pedidoDetalleForm/**", "/eliminarPedidoDetalle/**").hasRole(Rol.ADMIN.getNombre())
+		.antMatchers("/cargar-vinos/**").permitAll()
 		.anyRequest().authenticated()
 		.and()
 		.formLogin()
 		.loginPage("/login")
 		.permitAll()
+		.defaultSuccessUrl("/listarClientes", true)
 		.and()
 		.logout()
 		.invalidateHttpSession(true)

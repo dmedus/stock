@@ -1,222 +1,137 @@
 package com.stock.entidades;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
-@Table(name = "venta")
+@Table(name = "ventas")
 public class Venta {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@NotEmpty
-	private String cliente;
-	
-	@NotEmpty
-	private String imei;
-	
-	@ManyToOne
-	@JoinColumn(name = "modelo_id")
-	private Modelo modelo;
-	
-	@NotNull
-	@Temporal(TemporalType.DATE)
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date fecha;
 
-	@NotEmpty
-	private String moto;
-	
-	private int venta;
-	
-	private int costo;
-	
-	private int ganancia;
-	
-	private String tipoVenta;
-	
-	private String lugar;
-	
-	private String observacion;
-	
-	private boolean isCobrado;
-	
-	private String usuario;
-	
-	@OneToOne
-	@JoinColumn(name = "stock_id")
-	private Stock stock;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public Long getId() {
-		return id;
-	}
+    @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fecha;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Clientes cliente;
 
-	public String getCliente() {
-		return cliente;
-	}
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ListaPrecio listaPrecio;
 
-	public void setCliente(String cliente) {
-		this.cliente = cliente;
-	}
+    @Column(columnDefinition = "TEXT")
+    private String observaciones;
 
-	public Date getFecha() {
-		return fecha;
-	}
+    @Column(nullable = false)
+    private BigDecimal total;
 
-	public void setFecha(Date fecha) {
-		this.fecha = fecha;
-	}
+    @Column(nullable = false)
+    private BigDecimal pagado = BigDecimal.ZERO;
 
-	public String getMoto() {
-		return moto;
-	}
+    @Column(nullable = false)
+    private Boolean activo = true;
 
-	public void setMoto(String moto) {
-		this.moto = moto;
-	}
+    @Column(nullable = false)
+    private Boolean entregado = false;
 
-	public int getVenta() {
-		return venta;
-	}
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VentaDetalle> detalles = new ArrayList<>();
 
-	public void setVenta(int venta) {
-		this.venta = venta;
-	}
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
-	public String getTipoVenta() {
-		return tipoVenta;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setTipoVenta(String tipoVenta) {
-		this.tipoVenta = tipoVenta;
-	}
+    public LocalDate getFecha() {
+        return fecha;
+    }
 
-	public String getLugar() {
-		return lugar;
-	}
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
 
-	public void setLugar(String lugar) {
-		this.lugar = lugar;
-	}
+    public Clientes getCliente() {
+        return cliente;
+    }
 
-	public String getObservacion() {
-		return observacion;
-	}
+    public void setCliente(Clientes cliente) {
+        this.cliente = cliente;
+    }
 
-	public void setObservacion(String observacion) {
-		this.observacion = observacion;
-	}
+    public ListaPrecio getListaPrecio() {
+        return listaPrecio;
+    }
 
-	public boolean isCobrado() {
-		return isCobrado;
-	}
+    public void setListaPrecio(ListaPrecio listaPrecio) {
+        this.listaPrecio = listaPrecio;
+    }
 
-	public void setCobrado(boolean isCobrado) {
-		this.isCobrado = isCobrado;
-	}
+    public String getObservaciones() {
+        return observaciones;
+    }
 
-	public String getUsuario() {
-		return usuario;
-	}
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
+    }
 
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
-	}
+    public BigDecimal getTotal() {
+        return total;
+    }
 
-	public String getImei() {
-		return imei;
-	}
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
 
-	public void setImei(String imei) {
-		this.imei = imei;
-	}
+    public BigDecimal getPagado() {
+        return pagado;
+    }
 
-	public Modelo getModelo() {
-		return modelo;
-	}
+    public void setPagado(BigDecimal pagado) {
+        this.pagado = pagado;
+    }
 
-	public void setModelo(Modelo modelo) {
-		this.modelo = modelo;
-	}
+    public Boolean getActivo() {
+        return activo;
+    }
 
-	public Stock getStock() {
-		return stock;
-	}
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
 
-	public void setStock(Stock stock) {
-		this.stock = stock;
-	}
+    public Boolean getEntregado() {
+        return entregado;
+    }
 
-	
-	public int getGanancia() {
-		return ganancia;
-	}
+    public void setEntregado(Boolean entregado) {
+        this.entregado = entregado;
+    }
 
-	public void setGanancia(int ganancia) {
-		this.ganancia = ganancia;
-	}
-	
+    public List<VentaDetalle> getDetalles() {
+        return detalles;
+    }
 
-	public int getCosto() {
-		return costo;
-	}
-
-	public void setCosto(int costo) {
-		this.costo = costo;
-	}
-
-	public Venta(Long id, @NotEmpty String cliente, @NotNull Date fecha, @NotEmpty String moto, int venta,
-			String tipoVenta, String lugar, String observacion, boolean isCobrado, String usuario) {
-		super();
-		this.id = id;
-		this.cliente = cliente;
-		this.fecha = fecha;
-		this.moto = moto;
-		this.venta = venta;
-		this.tipoVenta = tipoVenta;
-		this.lugar = lugar;
-		this.observacion = observacion;
-		this.isCobrado = isCobrado;
-		this.usuario = usuario;
-	}
-
-	public Venta() {
-		super();
-	}
-
-	public Venta(@NotEmpty String cliente, @NotNull Date fecha, @NotEmpty String moto, int venta, String tipoVenta,
-			String lugar, String observacion, boolean isCobrado, String usuario) {
-		super();
-		this.cliente = cliente;
-		this.fecha = fecha;
-		this.moto = moto;
-		this.venta = venta;
-		this.tipoVenta = tipoVenta;
-		this.lugar = lugar;
-		this.observacion = observacion;
-		this.isCobrado = isCobrado;
-		this.usuario = usuario;
-	}
-
-	
+    public void setDetalles(List<VentaDetalle> detalles) {
+        this.detalles = detalles;
+    }
 }

@@ -1,28 +1,51 @@
-body{
-    background: url(../img/background.jpg) no-repeat center center fixed;
-    background-size: cover;
+body {
+	background-image: url('ruta_de_la_imagen.jpg');
+	background-size: cover;
 }
 
-.main-section{
-    margin:0 auto;
-    margin-top:5%;
-}
-.card{
-	opacity: .95;
-}
-.card-body{
-    background-color: #d1d3d6;
-    box-shadow: 0px 0px 3px #848484;
+.container {
+	background-color: rgba(255, 255, 255, 0.8);
+	width: 500px;
+	margin: 50px auto;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
-label{
-	font-weight: bold;
+form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
-.nav-tabs .nav-item a:not(.active){
-	background-color: #d1d3d6;
+h1 {
+	font-size: 30px;
+	margin-bottom: 20px;
 }
 
-.nav-tabs{
-	border-bottom:0px;
+label {
+	font-size: 20px;
+	margin-top: 20px;
+}
+
+input[type="text"], input[type="password"] {
+	font-size: 20px;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	margin-bottom: 20px;
+}
+
+input[type="submit"] {
+	font-size: 20px;
+	padding: 10px 20px;
+	background-color: #333;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+input[type="submit"]:hover {
+	background-color: #555;
 }

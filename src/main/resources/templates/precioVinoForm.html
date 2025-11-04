@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+	
+	<br>
+	
+	<div class="container">
+	   <div class="row">
+	      <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+	           <h1 class="text-center" th:text="${titulo}"></h1>
+	           <div class="card-body">
+	              <form th:action="@{/precioVinoForm}" th:object="${precioVino}" method="post">
+	                 <input type="hidden" th:field="*{id}"/>
+	                 <div class="form-group">
+	                    <label>Vino : </label>
+						<select th:field="*{vino}" class="form-control">
+							<option th:each="vino : ${vinos}" th:value="${vino.id}" th:text="${vino.nombre}"></option>
+						</select>
+	                 </div>
+	                  <div class="form-group">
+	                    <label>Lista de Precio : </label>
+						<select th:field="*{listaPrecio}" class="form-control">
+							<option th:each="listaPrecio : ${listasPrecio}" th:value="${listaPrecio.id}" th:text="${listaPrecio.nombre}"></option>
+						</select>
+	                 </div>
+	                 <div class="form-group">
+	                    <label>Precio : </label>
+						<input type="number" step="1" th:field="*{precio}" class="form-control" th:errorclass="'form-control alert-danger'" th:value="${#numbers.formatInteger(precioVino.precio, 0)}"/>
+	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></small> 
+	                 </div>
+	                 
+	                 <div class="box-footer"> 
+	                     <input type="submit" value="Guardar" class="btn btn-primary">
+	                     <a th:href="@{/listarPreciosVino}" class="btn btn-primary">Cancelar</a>
+	                 </div>
+	              </form>
+	           </div>
+	      </div>
+	   </div>
+	</div>
+	
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

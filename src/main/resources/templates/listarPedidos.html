@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">
+					<a th:href="@{/pedidoForm}" class="btn btn-primary">Agregar Pedido</a>		
+				</h4>
+								
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Fecha</th>
+							<th>Proveedor</th>
+							<th>Total</th>
+							<th>Pagado</th>
+							<th>Estado Pago</th>
+							<th>Activo</th>
+							<th>Editar</th>
+							<th>Eliminar</th>
+							<th>Confirmar</th>
+							<th>Pagar</th>
+							<th>Ver Detalles</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="pedido : ${pedidos}">
+							<td th:text="${pedido.id}"></td>
+							<td th:text="${pedido.fecha}"></td>
+							<td th:text="${pedido.proveedor}"></td>
+							<td th:text="${#numbers.formatCurrency(pedido.total)}"></td>
+							<td th:text="${#numbers.formatCurrency(pedido.pagado)}"></td>
+							<td th:text="${pedido.pagado.compareTo(pedido.total) >= 0 ? 'Sí' : 'No'}"></td>
+							<td th:text="${pedido.activo}"></td>
+							<td><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/pedidoForm/} + ${pedido.id}">Editar</a></td>
+							<td><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminarPedido/} + ${pedido.id}"
+								onclick="return confirm('¿Estás seguro de eliminar el Pedido: ?');">Eliminar</a></td>
+							<td th:if="${pedido.activo}"><a
+								class="btn btn-success btn-sm"
+								th:href="@{/confirmarPedido/} + ${pedido.id}"
+								onclick="return confirm('¿Estás seguro de confirmar el Pedido: ?');">Confirmar</a></td>
+							<td th:unless="${pedido.activo}"><a href="#" class="btn btn-success btn-sm disabled">Confirmar</a></td>
+							<td th:if="${pedido.pagado.compareTo(pedido.total) < 0}"><a
+								class="btn btn-primary btn-sm"
+								th:href="@{/pagarPedido/} + ${pedido.id}"
+								onclick="return confirm('¿Estás seguro de marcar el Pedido como pagado?');">Pagar</a></td>
+							<td th:unless="${pedido.pagado.compareTo(pedido.total) < 0}"><a href="#" class="btn btn-primary btn-sm disabled">Pagar</a></td>
+							<td><a
+								class="btn btn-info btn-sm"
+								th:href="@{/verPedidoDetalles/} + ${pedido.id}">Ver</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

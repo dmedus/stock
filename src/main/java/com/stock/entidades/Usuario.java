@@ -30,6 +30,19 @@ public class Usuario {
 	@Column(name="usuario")
 	private String usuario;
 	
+	@Column(nullable = false)
+	private Boolean activo = true;
+
+	
+	
+	public Boolean getActivo() {
+		return activo;
+	}
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
+	}
+
 	private String email;
 	
 	private String password;

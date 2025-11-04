@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">
+					<a th:href="@{/pedidoDetalleForm}" class="btn btn-primary">Agregar Detalle de Pedido</a>		
+				</h4>
+								
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Pedido</th>
+							<th>Vino</th>
+							<th>Cantidad botellas</th>
+							<th>Precio Unitario</th>
+							<th>Precio Caja</th>
+							<th>Subtotal</th>
+							<th>Editar</th>
+							<th>Eliminar</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="pedidoDetalle : ${pedidoDetalles}">
+							<td th:text="${pedidoDetalle.id}"></td>
+							<td th:text="${pedidoDetalle.pedido.id}"></td>
+							<td th:text="${pedidoDetalle.vino.nombre}"></td>
+							<td th:text="${pedidoDetalle.cantidad}"></td>
+							<td th:text="${pedidoDetalle.precioUnitario}"></td>
+							<td th:text="${pedidoDetalle.precioCaja}"></td>
+							<td th:text="${pedidoDetalle.subtotal}"></td>
+							<td><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/pedidoDetalleForm/} + ${pedidoDetalle.id}">Editar</a></td>
+							<td><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminarPedidoDetalle/} + ${pedidoDetalle.id}"
+								onclick="return confirm('¿Estás seguro de eliminar el Detalle de Pedido: ?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

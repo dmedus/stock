@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container py-4">
+		<div class="card">
+			<div class="card-header">Movimiento de Stock</div>
+			<div class="card-body">
+				<div th:if="${success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+					<span th:text="${success}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+					<span th:text="${error}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form th:action="@{/movimientoStock}" method="post">
+					<div class="form-group">
+						<label for="vinoId">Vino</label> <select name="vinoId"
+							id="vinoId" class="form-control">
+							<option th:each="vino : ${vinos}" th:value="${vino.id}"
+								t:text="${vino.nombre}"></option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="depositoOrigenId">Depósito Origen</label> <select
+							name="depositoOrigenId" id="depositoOrigenId"
+							class="form-control">
+							<option th:each="deposito : ${depositos}"
+								th:value="${deposito.id}" th:text="${deposito.nombre}"></option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="depositoDestinoId">Depósito Destino</label> <select
+							name="depositoDestinoId" id="depositoDestinoId"
+							class="form-control">
+							<option th:each="deposito : ${depositos}"
+								th:value="${deposito.id}" th:text="${deposito.nombre}"></option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="cantidad">Cantidad</label> <input type="number"
+							name="cantidad" id="cantidad" class="form-control" min="1"
+							required>
+					</div>
+					<button type="submit" class="btn btn-primary">Mover Stock</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

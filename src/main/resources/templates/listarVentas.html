@@ -12,55 +12,91 @@
 		<div class="card bg-light">
 			<div class="card-header" th:text="${titulo}"></div>
 			<div class="card-body">
-			
+				<h4 class="card-title">
+					<a th:href="@{/ventaForm}" class="btn btn-primary">Agregar Venta</a>		
+				</h4>
+								
 				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th>ID</th>							
-							<th>Modelo</th>
-							<th>IMEI</th>
+							<th>ID</th>
+							<th>Fecha</th>
 							<th>Cliente</th>
-							<th>Fecha</th>							
-							<th>Costo</th>
-							<th>Venta</th>
-							<th>Ganacia</th>
-							<th>Tipo</th>
-							<th>Usuario</th>
-							<th>Observacion</th>
+							<th>Total</th>
+							<th>Pagado</th>
+							<th>Activo</th>
+                            <th>Entregado</th>
 							<th>Editar</th>
 							<th>Eliminar</th>
+							<th>Entregar</th>
+							<th>Pagar</th>
+							<th>Ver Detalles</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="venta : ${listarVentas}">
+						<tr th:each="venta : ${ventas}">
 							<td th:text="${venta.id}"></td>
-							<td th:text="${venta.modelo.nombre} +' '+ ${venta.modelo.capacidad} +' '+ ${venta.modelo.color}"></td>
-							<td th:text="${venta.imei}"></td>
-							<td th:text="${venta.cliente}"></td>
 							<td th:text="${venta.fecha}"></td>
-							<td th:text="${venta.costo}"></td>
-							<td th:text="${venta.venta}"></td>
-							<td th:text="${venta.ganancia}"></td>
-							<td th:text="${venta.tipoVenta}"></td>							
-							<td th:text="${venta.usuario}"></td>
-							<td th:text="${venta.observacion}"></td>
+							<td th:text="${venta.cliente.nombre}"></td>
+							<td th:text="${#numbers.formatCurrency(venta.total)}"></td>
+							<td th:text="${#numbers.formatCurrency(venta.pagado)}"></td>
+							<td th:text="${venta.activo}"></td>
+                            <td th:text="${venta.entregado} ? 'Sí' : 'No'"></td>
 							<td><a
 								class="btn btn-warning btn-sm"
 								th:href="@{/ventaForm/} + ${venta.id}">Editar</a></td>
 							<td><a
 								class="btn btn-danger btn-sm"
 								th:href="@{/eliminarVenta/} + ${venta.id}"
-								onclick="return confirm('¿Estás seguro de eliminar la venta?');">Eliminar</a></td>
+								onclick="return confirm('¿Estás seguro de eliminar la Venta: ?');">Eliminar</a></td>
+                            <td>
+                                <form th:action="@{/entregarVenta}" method="post" style="display:inline;">
+                                    <input type="hidden" name="ventaId" th:value="${venta.id}"/>
+                                    <button type="submit" class="btn btn-info btn-sm" th:disabled="${venta.entregado}">Entregar</button>
+                                </form>
+                            </td>
+                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="modal" th:data-target="'#pagoModal' + ${venta.id}">Pagar</button></td>
+							<td><a
+								class="btn btn-info btn-sm"
+								th:href="@{/verVentaDetalles/} + ${venta.id}">Ver</a></td>
+
+
+<!-- Modal -->
+<div class="modal fade" th:id="'pagoModal' + ${venta.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Registrar Pago</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form th:action="@{/pagarVenta}" method="post">
+          <input type="hidden" name="ventaId" th:value="${venta.id}"/>
+          <div class="form-group">
+            <label for="metodoPago">Método de Pago</label>
+            <select class="form-control" id="metodoPago" name="metodoPago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="monto">Monto</label>
+            <input type="number" class="form-control" id="monto" name="monto" th:value="${venta.total - venta.pagado}" step="0.01">
+          </div>
+          <button type="submit" class="btn btn-primary">Confirmar Pago</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 						</tr>
 					</tbody>
 				</table>
-				<br> 
-				
-				<div  style="float: right">
-				<a sec:authorize="hasRole('ADMIN')" th:href="@{/ventaExportarExcel}" class="btn btn-success" >Exportar a Excel</a>
-				</div>
 			</div>
-		</div>
+			</div>
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

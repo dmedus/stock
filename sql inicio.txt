@@ -1,0 +1,42 @@
+-- Insersión de datos iniciales para la base de datos de vinos
+
+-- IMPORTANTE:
+-- Las tablas BODEGA y CLIENTE tienen ID AUTO_INCREMENT, por lo que se omite el campo ID.
+-- Los valores BOOLEAN deben ser TRUE/FALSE.
+-- Los valores de texto deben usar comillas simples (' ').
+
+-- ---------------------------------------------------------------------------------------
+-- 0. SELECCIÓN DE BASE DE DATOS (Soluciona el Error 1046)
+-- ---------------------------------------------------------------------------------------
+
+USE `db_stock`;
+
+-- ---------------------------------------------------------------------------------------
+-- 1. INSERCIÓN DE BODEGAS (IDs Simples: 1, 2, 3...)
+-- ---------------------------------------------------------------------------------------
+
+INSERT INTO `bodega` (`activa`, `nombre`, `region`) VALUES
+(TRUE, 'Catena Zapata', 'Mendoza'),  -- ID 1
+(TRUE, 'El Enemigo', 'Mendoza'),      -- ID 2
+(TRUE, 'Mosquita Muerta', 'Mendoza'),  -- ID 3
+(TRUE, 'Tapiz', 'Mendoza'),          -- ID 4
+(TRUE, 'Wapisa', 'Río Negro'),        -- ID 5
+(TRUE, 'El Porvenir de Cafayate', 'Salta'), -- ID 6
+(TRUE, 'Trapiche', 'Mendoza'),        -- ID 7
+(TRUE, 'Septima', 'Mendoza'),         -- ID 8
+(FALSE, 'COMBO / KIT', 'No Aplica');  -- ID 9 (para referencia interna)
+
+-- ---------------------------------------------------------------------------------------
+-- 2. INSERCIÓN DE CLIENTES (IDs Simples: 1, 2, 3...)
+-- Actualizado con campos: ciudad, direccion, pais, provincia, fecha_alta
+-- ---------------------------------------------------------------------------------------
+
+INSERT INTO `cliente` (`activo`, `apellido`, `nombre`, `telefono`, `email`, `ciudad`, `direccion`, `pais`, `provincia`, `fecha_alta`) VALUES
+(TRUE, 'Richard', 'Coco', '1134567890', 'coco.r@example.com', 'CABA', 'Av. Libertador 1234', 'Argentina', 'Buenos Aires', CURDATE()), -- ID 1
+(TRUE, 'Díaz', 'Saverio', '1145678901', 'saverio.d@example.com', 'Córdoba', 'Calle Falsa 123', 'Argentina', 'Córdoba', CURDATE()), -- ID 2
+(TRUE, 'Corletta', 'Nati', '1156789012', 'nati.c@example.com', 'Rosario', 'Bv. Oroño 456', 'Argentina', 'Santa Fe', CURDATE()), -- ID 3
+(TRUE, 'Berwart', 'Carla', '1167890123', 'carla.b@example.com', 'Mendoza', 'Sarmiento 789', 'Argentina', 'Mendoza', CURDATE()), -- ID 4
+(TRUE, 'Paz', 'Claudia', '1178901234', 'claudia.p@example.com', 'CABA', 'Rivadavia 101', 'Argentina', 'Buenos Aires', CURDATE()), -- ID 5
+(TRUE, 'Celinski', 'Matias', '1189012345', 'matias.c@example.com', 'Mar del Plata', 'Belgrano 202', 'Argentina', 'Buenos Aires', CURDATE()), -- ID 6
+(TRUE, 'Perez', 'Cris', '1190123456', 'cris.p@example.com', 'Neuquén', 'Roca 303', 'Argentina', 'Neuquén', CURDATE()), -- ID 7
+(TRUE, 'Marco', 'Hernan', '1101234567', 'hernan.m@example.com', 'Tucumán', 'San Martín 404', 'Argentina', 'Tucumán', CURDATE()); -- ID 8

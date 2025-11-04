@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+	
+	<br>
+	
+	<div class="container">
+	   <div class="row">
+	      <div class="col-lg-12 col-md-12 col-sm-12 container justify-content-center card">
+	           <h1 class="text-center" th:text="${titulo}"></h1>
+	           <div class="card-body">
+	              <form th:action="@{/pedidoForm}" th:object="${pedido}" method="post">
+	                 <input type="hidden" th:field="*{id}"/>
+	                 <div class="form-group row">
+	                    <label class="col-sm-2 col-form-label">Fecha : </label>
+                        <div class="col-sm-6">
+						    <input type="date" th:field="*{fecha}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                        <small class="form-text text-danger" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></small> 
+                        </div>
+	                 </div>
+	                 <div class="form-group row">
+	                    <label class="col-sm-2 col-form-label">Proveedor : </label>
+                        <div class="col-sm-6">
+						    <input type="text" th:field="*{proveedor}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                        <small class="form-text text-danger" th:if="${#fields.hasErrors('proveedor')}" th:errors="*{proveedor}"></small> 
+                        </div>
+	                 </div>
+
+                     <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">Observaciones : </label>
+                        <div class="col-sm-6">
+                            <textarea th:field="*{observaciones}" class="form-control" rows="3"></textarea>
+                        </div>
+                     </div>
+
+                     <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">Deposito : </label>
+                        <div class="col-sm-6">
+                            <select th:field="*{deposito}" class="form-control">
+                                <option th:each="deposito : ${depositos}"
+                                        th:value="${deposito.id}"
+                                        th:text="${deposito.nombre}"></option>
+                            </select>
+                        </div>
+                     </div>
+
+                     <hr/>
+
+                     <div class="form-group row">
+                        <label for="buscar_vino" class="col-sm-2 col-form-label">Buscar Vino:</label>
+                        <div class="col-sm-4">
+                            <input type="text" id="buscar_vino" class="form-control"/>
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="button" id="btn_buscar_vino" class="btn btn-info">Buscar</button>
+                        </div>
+                     </div>
+
+                     <div id="resultados_busqueda_vino" class="mb-3"></div>
+
+                    <table id="items_pedido" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Cant Cajas</th>
+                                <th>Total</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Items will be added here -->
+    <tr class="item_row" th:each="detalle : *{detalles}">
+        <td><input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> <span th:text="${detalle.vino.nombre}"></span></td>
+        <td><input type="number" name="precio[]" th:value="${detalle.precioUnitario}" class="form-control item_precio" style="width: 100px;"/></td>
+        <td><input type="number" name="cantidad[]" th:value="${detalle.cantidad / detalle.vino.cantVinosxcaja}" class="form-control cantidad" style="width: 60px;" /></td>
+        <td class="total_item" th:text="${#numbers.formatDecimal(detalle.subtotal, 0, 'POINT', 0, 'COMMA')}"></td>
+        <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
+        <input type="hidden" class="cant_vinos_x_caja" th:value="${detalle.vino.cantVinosxcaja}"/>
+    </tr>
+                        </tbody>
+                    </table>
+
+                    <h5>Total: <span id="total_pedido">0.00</span></h5>
+
+	                 <div class="box-footer"> 
+	                     <input type="submit" value="Guardar Pedido" class="btn btn-primary">
+	                     <a th:href="@{/listarPedidos}" class="btn btn-primary">Cancelar</a>
+	                 </div>
+	              </form>
+	           </div>
+	      </div>
+	   
+	   </div>
+	</div>
+	
+	<footer th:replace="layout/layout :: footer"></footer>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        let totalPedido = 0;
+
+        $(document).ready(function() {
+            calcularTotal();
+            $("#btn_buscar_vino").on("click", function() {
+                let searchTerm = $("#buscar_vino").val();
+                if (searchTerm.length < 1) {
+                    $("#resultados_busqueda_vino").html("<p>Ingrese al menos 1 caracter para buscar.</p>");
+                    return;
+                }
+
+                $.ajax({
+                    url: /*[[@{/cargar-vinos}]]*/ "/cargar-vinos",
+                    data: { term: searchTerm },
+                    dataType: "json",
+                    success: function(data) {
+                        console.log("Data from /cargar-vinos:", data);
+                        let resultsHtml = "";
+                        if (data.length > 0) {
+                            resultsHtml += "<ul class=\"list-group\">";
+                            $.each(data, function(index, item) {
+                                resultsHtml += "<li class=\"list-group-item\" data-id=\"" + item.id + "\" data-nombre=\"" + item.nombre + "\" data-cantvinosxcaja=\"" + item.cantVinosxcaja + "\">" + item.nombre + "</li>";
+                            });
+                            resultsHtml += "</ul>";
+                        } else {
+                            resultsHtml += "<p>No se encontraron vinos.</p>";
+                        }
+                        $("#resultados_busqueda_vino").html(resultsHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading wines:", xhr, status, error);
+                        $("#resultados_busqueda_vino").html("<p>Error al cargar vinos. Intente de nuevo.</p>");
+                    }
+                });
+            });
+
+            $("#resultados_busqueda_vino").on("click", ".list-group-item", function() {
+                let vinoId = $(this).data("id");
+                let vinoNombre = $(this).data("nombre");
+                let cantVinosxcaja = $(this).data("cantvinosxcaja");
+
+                let linea = $("#plantillaItemsPedido").html();
+
+                linea = linea.replace(/{ID}/g, vinoId);
+                linea = linea.replace(/{NOMBRE}/g, vinoNombre);
+                linea = linea.replace(/{PRECIO}/g, "0"); // Initial price per bottle is 0
+                linea = linea.replace(/{CANT_VINOS_X_CAJA}/g, cantVinosxcaja);
+
+                $("#items_pedido tbody").append(linea);
+                calcularTotal();
+                $("#resultados_busqueda_vino").empty(); // Clear search results
+                $("#buscar_vino").val(""); // Clear search input
+            });
+
+            $("#items_pedido").on("change", ".cantidad, .item_precio", function() {
+                let row = $(this).closest("tr");
+                let cantidadCajas = row.find(".cantidad").val(); // Number of boxes
+                let precioPorBotella = parseFloat(row.find(".item_precio").val()); // Price per bottle
+                let cantVinosxcaja = parseFloat(row.find(".cant_vinos_x_caja").val()); // Bottles per box
+
+                let precioPorCaja = precioPorBotella * cantVinosxcaja;
+                let totalItem = precioPorCaja * cantidadCajas; // Total = (price per bottle * bottles per box) * number of boxes
+
+                row.find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}));
+                calcularTotal();
+            });
+        });
+
+        function eliminarItem(btn) {
+            $(btn).closest("tr").remove();
+            calcularTotal();
+        }
+
+        function calcularTotal() {
+            totalPedido = 0;
+            $("#items_pedido tbody tr").each(function() {
+                let itemTotalText = $(this).find(".total_item").text();
+                totalPedido += parseFloat(itemTotalText.replace(/\./g, "").replace(",", ".")); 
+            });
+            $("#total_pedido").text(totalPedido.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}));
+        }
+    </script>
+
+    <script type="text/template" id="plantillaItemsPedido">
+        <tr class="item_row">
+            <td><input type="hidden" name="item_id[]" value="{ID}">{NOMBRE}</td>
+            <td><input type="number" name="precio[]" value="{PRECIO}" class="form-control item_precio" style="width: 100px;"/></td>
+            <td><input type="number" name="cantidad[]" value="1" class="form-control cantidad" style="width: 60px;"/></td>
+            <td class="total_item">0</td>
+            <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
+            <input type="hidden" class="cant_vinos_x_caja" value="{CANT_VINOS_X_CAJA}"/>
+        </tr>
+    </script>
+</body>
+</html>

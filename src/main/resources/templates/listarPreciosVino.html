@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">
+					<a th:href="@{/precioVinoForm}" class="btn btn-primary">Agregar Precio de Vino</a>
+					<button type="button" class="btn btn-info" data-toggle="modal" data-target="#importarExportarModal">
+						Importar/Exportar
+					</button>
+				</h4>
+
+				<div th:if="${success != null}" class="alert alert-success alert-dismissible fade show" role="alert">
+					<span th:text="${success}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+					<span th:text="${error}"></span>
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+
+				<form th:action="@{/listarPreciosVino}" method="get" class="form-inline mb-3">
+				    <div class="form-group mx-sm-3 mb-2">
+				        <select name="listaId" class="form-control" onchange="this.form.submit()">
+				            <option value="">Todas las listas</option>
+				            <option th:each="lista : ${listasPrecio}"
+				                    th:value="${lista.id}"
+				                    th:text="${lista.nombre}"
+				                    th:selected="${lista.id == listaId}"></option>
+				        </select>
+				    </div>
+				</form>
+										
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Vino</th>
+							<th>Lista de Precio</th>
+							<th>Precio</th>
+							<th>Editar</th>
+							<th>Eliminar</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="precioVino : ${preciosVino}">
+							<td th:text="${precioVino.id}"></td>
+							<td th:text="${precioVino.vino.nombre}"></td>
+							<td th:text="${precioVino.listaPrecio.nombre}"></td>
+							<td th:text="${#numbers.formatCurrency(precioVino.precio)}"></td>
+							<td><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/precioVinoForm/} + ${precioVino.id}">Editar</a></td>
+							<td><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminarPrecioVino/} + ${precioVino.id}"
+								onclick="return confirm('¿Estás seguro de eliminar el Precio de Vino: ?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="importarExportarModal" tabindex="-1" role="dialog" aria-labelledby="importarExportarModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="importarExportarModalLabel">Importar/Exportar Precios de Vino</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <h5>Exportar</h5>
+	        <a th:href="@{/exportarPreciosVino}" class="btn btn-success ml-2">Exportar a Excel</a>
+	        <hr>
+	        <h5>Importar</h5>
+	        <form th:action="@{/importarPreciosVino}" method="post" enctype="multipart/form-data" class="mb-3">
+				<div class="form-group">
+					<label for="file">Importar Precios desde Excel:</label>
+					<input type="file" name="file" id="file" class="form-control-file">
+				</div>
+				<button type="submit" class="btn btn-info">Importar</button>
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>
+

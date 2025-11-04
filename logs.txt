@@ -1,0 +1,88 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m-----------------< [0;36mcom.gestion.empleados:stock-ventas[0;1m >-----------------[m
+[[1;34mINFO[m] [1mBuilding mini-control-empleados 1.0[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.2.0:resources[m [1m(default-resources)[m @ [36mstock-ventas[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered properties files.
+[[1;34mINFO[m] Copying 1 resource
+[[1;34mINFO[m] Copying 33 resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.8.1:compile[m [1m(default-compile)[m @ [36mstock-ventas[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 64 source files to C:\Users\Dmedus\Desktop\VendemosVinos\stock-vinos\target\classes
+[[1;34mINFO[m] -------------------------------------------------------------
+[[1;31mERROR[m] COMPILATION ERROR : 
+[[1;34mINFO[m] -------------------------------------------------------------
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[51,10] cannot find symbol
+  symbol:   class Enumerated
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[51,21] cannot find symbol
+  symbol:   variable EnumType
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[52,10] cannot find symbol
+  symbol:   class Column
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[55,10] cannot find symbol
+  symbol:   class Enumerated
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[55,21] cannot find symbol
+  symbol:   variable EnumType
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[56,10] cannot find symbol
+  symbol:   class Column
+  location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[109,41] cannot find symbol
+  symbol:   variable UnitOfMeasure
+  location: class com.stock.controlador.StockVinosControlador
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[137,46] cannot find symbol
+  symbol:   variable UnitOfMeasure
+  location: class com.stock.controlador.StockVinosControlador
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[137,101] cannot find symbol
+  symbol:   variable UnitOfMeasure
+  location: class com.stock.controlador.StockVinosControlador
+[[1;34mINFO[m] 9 errors 
+[[1;34mINFO[m] -------------------------------------------------------------
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;31mBUILD FAILURE[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  5.457 s
+[[1;34mINFO[m] Finished at: 2025-10-24T16:25:50-03:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;31mERROR[m] Failed to execute goal [32morg.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile[m [1m(default-compile)[m on project [36mstock-ventas[m: [1;31mCompilation failure[m: Compilation failure: 
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[51,10] cannot find symbol
+[[1;31mERROR[m]   symbol:   class Enumerated
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[51,21] cannot find symbol
+[[1;31mERROR[m]   symbol:   variable EnumType
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[52,10] cannot find symbol
+[[1;31mERROR[m]   symbol:   class Column
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[55,10] cannot find symbol
+[[1;31mERROR[m]   symbol:   class Enumerated
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[55,21] cannot find symbol
+[[1;31mERROR[m]   symbol:   variable EnumType
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/entidades/VentaVinos.java:[56,10] cannot find symbol
+[[1;31mERROR[m]   symbol:   class Column
+[[1;31mERROR[m]   location: class com.stock.entidades.VentaVinos
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[109,41] cannot find symbol
+[[1;31mERROR[m]   symbol:   variable UnitOfMeasure
+[[1;31mERROR[m]   location: class com.stock.controlador.StockVinosControlador
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[137,46] cannot find symbol
+[[1;31mERROR[m]   symbol:   variable UnitOfMeasure
+[[1;31mERROR[m]   location: class com.stock.controlador.StockVinosControlador
+[[1;31mERROR[m] /C:/Users/Dmedus/Desktop/VendemosVinos/stock-vinos/src/main/java/com/stock/controlador/StockVinosControlador.java:[137,101] cannot find symbol
+[[1;31mERROR[m]   symbol:   variable UnitOfMeasure
+[[1;31mERROR[m]   location: class com.stock.controlador.StockVinosControlador
+[[1;31mERROR[m] -> [1m[Help 1][m
+[[1;31mERROR[m] 
+[[1;31mERROR[m] To see the full stack trace of the errors, re-run Maven with the [1m-e[m switch.
+[[1;31mERROR[m] Re-run Maven using the [1m-X[m switch to enable full debug logging.
+[[1;31mERROR[m] 
+[[1;31mERROR[m] For more information about the errors and possible solutions, please read the following articles:
+[[1;31mERROR[m] [1m[Help 1][m http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

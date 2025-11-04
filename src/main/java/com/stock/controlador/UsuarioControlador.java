@@ -26,8 +26,8 @@ public class UsuarioControlador {
 	UsuarioService usuarioService;
 	
 	@ModelAttribute("usuario")
-	public UsuarioDTO retornarNuevoUsuarioRegistroDTO() {
-		return new UsuarioDTO();
+	public Usuario retornarNuevoUsuarioRegistroDTO() {
+		return new Usuario();
 	}
 
 	@GetMapping({"/listarUsuarios"})
@@ -51,7 +51,7 @@ public class UsuarioControlador {
 	}
 	
 	@PostMapping("/usuarioForm")
-	public String guardarUsuario(@ModelAttribute("usuario") UsuarioDTO registroDTO,BindingResult result,Model modelo,RedirectAttributes flash,SessionStatus status,Authentication auth) {
+	public String guardarUsuario(@ModelAttribute("usuario") Usuario registroDTO,BindingResult result,Model modelo,RedirectAttributes flash,SessionStatus status,Authentication auth) {
 		if(result.hasErrors()) {
 			modelo.addAttribute("titulo", "Registro de Modelos");
 			return "usuarioForm";
@@ -82,7 +82,7 @@ public class UsuarioControlador {
 		
 		modelo.put("usuario",usuario);
 		modelo.put("editar",false);
-		modelo.put("titulo", "Edición de stock");
+		modelo.put("titulo", "Edición de Usuario");
 		return "usuarioForm";
 	}
 	

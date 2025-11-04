@@ -24,7 +24,7 @@ public class UsuarioServiceImpl implements UsuarioService{
 	private BCryptPasswordEncoder passwordEncoder;
 	
 	@Override
-	public Usuario guardar(UsuarioDTO registroDTO) {
+	public Usuario guardar(Usuario registroDTO) {
 		Usuario usuario = new Usuario(registroDTO.getId(),registroDTO.getNombre(), 
 				registroDTO.getApellido(),registroDTO.getUsuario(),registroDTO.getEmail(),
 				passwordEncoder.encode(registroDTO.getPassword()),registroDTO.getRol() );

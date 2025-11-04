@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">Detalles de la Venta</h4>
+				<ul class="list-group mb-3">
+					<li class="list-group-item"><strong>ID Venta:</strong> <span th:text="${venta.id}"></span></li>
+					<li class="list-group-item"><strong>Fecha:</strong> <span th:text="${venta.fecha}"></span></li>
+					<li class="list-group-item"><strong>Cliente:</strong> <span th:text="${venta.cliente.nombre}"></span></li>
+					<li class="list-group-item"><strong>Total:</strong> <span th:text="${#numbers.formatCurrency(venta.total)}"></span></li>
+					<li class="list-group-item"><strong>Pagado:</strong> <span th:text="${#numbers.formatCurrency(venta.pagado)}"></span></li>
+					<li class="list-group-item"><strong>Activo:</strong> <span th:text="${venta.activo}"></span></li>
+					<li class="list-group-item"><strong>Observaciones:</strong> <span th:text="${venta.observaciones}"></span></li>
+				</ul>
+								
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID Detalle</th>
+							<th>Vino</th>
+							<th>Cantidad</th>
+							<th>Precio Unitario</th>
+							<th>Precio Caja</th>
+							<th>Subtotal</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="detalle : ${venta.detalles}">
+							<td th:text="${detalle.id}"></td>
+							<td th:text="${detalle.vino.nombre}"></td>
+							<td th:text="${detalle.cantidad}"></td>
+							<td th:text="${#numbers.formatCurrency(detalle.precioUnitario)}"></td>
+							<td th:text="${#numbers.formatCurrency(detalle.precioCaja)}"></td>
+							<td th:text="${#numbers.formatCurrency(detalle.subtotal)}"></td>
+						</tr>
+					</tbody>
+				</table>
+				<a th:href="@{/listarVentas}" class="btn btn-primary">Volver a Ventas</a>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

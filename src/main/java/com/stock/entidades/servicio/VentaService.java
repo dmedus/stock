@@ -1,18 +1,23 @@
- package com.stock.entidades.servicio;
-
-import java.util.List;
+package com.stock.entidades.servicio;
 
 import com.stock.entidades.Venta;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public interface VentaService {
 
+    public List<Venta> findAll();
 
-	public List<Venta> findAll();
-	
-	public void save(Venta venta);
-	
-	public Venta findOne(Long id);
-	
-	public void delete(Long id);
- 
+    public Venta findById(Long id);
+
+    public void save(Venta venta);
+
+    public void deleteById(Long id);
+
+    public long countAll();
+
+    public BigDecimal sumTotalVentas();
+
+    public List<Venta> findTop5ByOrderByFechaDesc();
 }

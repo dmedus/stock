@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container py-4">
+
+		<div class="row">
+			<div class="col-lg-3 col-md-6">
+				<div class="card bg-primary text-white mb-4">
+					<div class="card-body">
+						<h5 class="card-title">Total Ventas</h5>
+						<p class="card-text" th:text="${totalVentas}"></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<div class="card bg-success text-white mb-4">
+					<div class="card-body">
+						<h5 class="card-title">Total Ingresos</h5>
+						<p class="card-text" th:text="${#numbers.formatCurrency(totalIngresos)}"></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<div class="card bg-info text-white mb-4">
+					<div class="card-body">
+						<h5 class="card-title">Total Clientes</h5>
+						<p class="card-text" th:text="${totalClientes}"></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6">
+				<div class="card bg-warning text-white mb-4">
+					<div class="card-body">
+						<h5 class="card-title">Total Vinos</h5>
+						<p class="card-text" th:text="${totalVinos}"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title">Ventas Recientes</h5>
+					</div>
+					<div class="card-body">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Fecha</th>
+									<th>Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="venta : ${ventasRecientes}">
+									<td th:text="${venta.id}"></td>
+									<td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy')}"></td>
+									<td th:text="${#numbers.formatCurrency(venta.total)}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title">Vinos con Poco Stock</h5>
+					</div>
+					<div class="card-body">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Nombre</th>
+									<th>Stock Actual</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="vino : ${vinosPocoStock}">
+									<td th:text="${vino.id}"></td>
+									<td th:text="${vino.nombre}"></td>
+									<td th:text="${vino.stockActual}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

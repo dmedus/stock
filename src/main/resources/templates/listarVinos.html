@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="py-4 ml-5 mr-5">
+		<div class="card bg-light">
+			<div class="card-header" th:text="${titulo}"></div>
+			<div class="card-body">
+				<h4 class="card-title">
+					<a th:href="@{/vinoForm}" class="btn btn-primary">Agregar Vino</a>		
+				</h4>
+								
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Nombre</th>
+							<th>Bodega</th>
+							<th>Variedad</th>
+							<th>Año Cosecha</th>
+							<th>Stock Actual</th>
+							<th>Stock Minimo</th>
+							<th>Cant. Vinos/Caja</th>
+							<th>Activo</th>
+							<th>Editar</th>
+							<th>Eliminar</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="vino : ${vinos}">
+							<td th:text="${vino.id}"></td>
+							<td th:text="${vino.nombre}"></td>
+							<td th:text="${vino.bodega.nombre}"></td>
+							<td th:text="${vino.variedad.nombre}"></td>
+							<td th:text="${vino.anioCosecha}"></td>
+							<td th:text="${vino.stockActual}"></td>
+							<td th:text="${vino.stockMinimo}"></td>
+							<td th:text="${vino.cantVinosxcaja}"></td>
+							<td th:text="${vino.activo}"></td>
+							<td><a
+								class="btn btn-warning btn-sm"
+								th:href="@{/vinoForm/} + ${vino.id}">Editar</a></td>
+							<td><a
+								class="btn btn-danger btn-sm"
+								th:href="@{/eliminarVino/} + ${vino.id}"
+								onclick="return confirm('¿Estás seguro de eliminar el Vino: ?');">Eliminar</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

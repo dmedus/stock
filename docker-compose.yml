@@ -7,7 +7,7 @@ services:
     depends_on:
       - mysqldb
     environment:
-      - DATASOURCE_URL=jdbc:mysql://mysqldb:3307/db_stock  
+      - DATASOURCE_URL=jdbc:mysql://mysqldb:3306/db_stock  
       - DATASOURCE_USERNAME=root
       - DATASOURCE_PASSWORD=root
     ports:
@@ -17,9 +17,6 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: db_stock
-      MYSQL_PASSWORD: root
       MYSQL_ROOT_PASSWORD: root 
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-      MYSQL_RANDOM_ROOT_PASSWORD: 'no' 
     ports:
       - 3307:3306

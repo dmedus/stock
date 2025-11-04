@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout/layout :: head">
 <meta charset="utf-8">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 <body>
 
@@ -11,67 +12,222 @@
 	
 	<div class="container">
 	   <div class="row">
-	      <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+	      <div class="col-lg-12 col-md-12 col-sm-12 container justify-content-center card">
 	           <h1 class="text-center" th:text="${titulo}"></h1>
 	           <div class="card-body">
-				   <h4 style="color: forestgreen" th:text="${stock.modelo.nombre}">Modelo</h4>
-				   <h4 style="color: forestgreen" th:text="Imei +' '+${stock.imei}">Imei</h4>
-	              <form th:action="@{/ventaForm/} + ${stock.id}" th:object="${venta}" method="post">
-	                <input type="hidden" th:field="*{id}" th:value="${venta.id}"/>
-	                 <div class="form-group">
-	                    <label>Cliente : </label>
-	                    <input type="text" th:field="*{cliente}" class="form-control" th:errorclass="'form-control alert-danger'"/>
-	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('cliente')}" th:errors="*{cliente}"></small> 
-	                 </div>
-	                 <div class="form-group">
-	                    <label>Moto : </label>
-	                    <select class="form-control" th:field="*{moto}">
-	                        <option th:value='CHAMPION'>CHAMPION</option>
-	                        <option th:value='ROMAN'>ROMAN</option>
-	                        <option th:value='MARITO'>MARITO</option>
-	                        <option th:value='OTRO'>OTRO</option>	             
-	                    </select>
-	                 </div>
-	                 <div class="form-group">
-	                    <label>Venta : </label>
-	                    <input type="number" th:field="*{venta}" class="form-control" th:errorclass="'form-control alert-danger'"/>
-	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('venta')}" th:errors="*{venta}"></small> 
-	                 </div>
-	                 <div class="form-group">
-	                    <label>Tipo : </label>
-	                    <select class="form-control" th:field="*{tipoVenta}">
-	                        <option th:value='USD'>USD</option>
-	                        <option th:value='PESOS'>PESOS</option>           
-	                    </select>
-	                 </div>		  
-	                 <div class="form-group">
-	                    <label>Fecha : </label>
-	                    <input type="date" th:field="*{fecha}" class="form-control" th:errorclass="'form-control alert-danger'"/>
-	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></small> 
-	                 </div>
-	                 <div class="form-group">
-	                    <label>Lugar : </label>
-	                    <select class="form-control" th:field="*{lugar}">
-	                        <option th:value='Izone'>Izone</option>
-	                        <option th:value='otro'>otro</option>
-	                    </select>
-	                 </div> 
-	                 <div class="form-group">
-	                    <label>Observacion : </label>
-	                    <textarea  type="text" th:field="*{observacion}" class="form-control" th:errorclass="'form-control alert-danger'"/>
-	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('observacion')}" th:errors="*{observacion}"></small> 
-	                 </div>
+	              <form th:action="${venta.id != null} ? @{/guardarVenta/{id}(id=${venta.id})} : @{/guardarVenta}" th:object="${venta}" method="post">
+                 <input type="hidden" th:field="*{id}"/>
+	                 <div class="form-group row">
+                    <label for="buscar_cliente" class="col-sm-2 col-form-label">Buscar Cliente:</label>
+                    <div class="col-sm-4">
+                        <input type="text" id="buscar_cliente" class="form-control" th:value="${venta.cliente != null ? venta.cliente.nombre : ''}"/>
+                        <input type="hidden" id="clienteId" name="clienteId" th:value="${venta.cliente != null ? venta.cliente.id : ''}"/>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" id="btn_buscar_cliente" class="btn btn-info">Buscar</button>
+                    </div>
+                 </div>
+                 <div id="resultados_busqueda_cliente" class="mb-3"></div>
+
 	                 
+	                 <div class="form-group row">
+	                    <label class="col-sm-2 col-form-label">Lista de Precio : </label>
+                        <div class="col-sm-6">
+                            <select name="listaPrecioId" id="listaPrecioId" class="form-control">
+                                <option th:each="lista : ${listasPrecio}" th:value="${lista.id}" th:text="${lista.nombre}" th:selected="${venta.listaPrecio != null and venta.listaPrecio.id == lista.id}"></option>
+                            </select>
+                        </div>
+	                 </div>
+
+                     <hr/>
+
+                     <div class="form-group row">
+                        <label for="buscar_vino" class="col-sm-2 col-form-label">Buscar Vino:</label>
+                        <div class="col-sm-4">
+                            <input type="text" id="buscar_vino" class="form-control"/>
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="button" id="btn_buscar_vino" class="btn btn-info">Buscar</button>
+                        </div>
+                     </div>
+
+                     <div id="resultados_busqueda_vino" class="mb-3"></div>
+
+                    <table id="items_venta" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Items will be added here -->
+							<tr class="item_row" th:each="detalle : *{detalles}">
+								<td><input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> <span th:text="${detalle.vino.nombre}"></span></td>
+								<td><input type="hidden" class="item_precio" th:value="${detalle.precioUnitario}" /> <span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></span></td>
+								<td><input type="number" name="cantidad[]" th:value="${detalle.cantidad}" class="form-control cantidad" style="width: 60px;" /></td>
+								<td class="total_item" th:text="${#numbers.formatDecimal(detalle.subtotal, 1, 'POINT', 2, 'COMMA')}"></td>
+								<td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
+							</tr>
+                        </tbody>
+                    </table>
+
+                    <h5>Total: <span id="total_venta">0.00</span></h5>
+
 	                 <div class="box-footer"> 
-	                     <input type="submit" value="Guardar" class="btn btn-primary">
-	                     <a th:href="@{/listarStocks}" class="btn btn-primary">Cancelar</a>
+	                     <input type="submit" value="Guardar Venta" class="btn btn-primary">
+	                     <a th:href="@{/}" class="btn btn-primary">Cancelar</a>
 	                 </div>
 	              </form>
 	           </div>
 	      </div>
+	   
 	   </div>
 	</div>
 	
 	<footer th:replace="layout/layout :: footer"></footer>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        let totalVenta = 0;
+
+        $(document).ready(function() {
+            $("#btn_buscar_cliente").on("click", function() {
+                let searchTerm = $("#buscar_cliente").val();
+                if (searchTerm.length < 1) {
+                    $("#resultados_busqueda_cliente").html("<p>Ingrese al menos 1 caracter para buscar.</p>");
+                    return;
+                }
+
+                $.ajax({
+                    url: /*[[@{/cargar-clientes}]]*/ "/cargar-clientes",
+                    data: { term: searchTerm },
+                    dataType: "json",
+                    success: function(data) {
+                        let resultsHtml = "";
+                        if (data.length > 0) {
+                            resultsHtml += "<ul class=\"list-group\">";
+                            $.each(data, function(index, item) {
+                                resultsHtml += "<li class=\"list-group-item\" data-id=\"" + item.id + "\" data-nombre=\"" + item.nombre + "\">" + item.nombre + "</li>";
+                            });
+                            resultsHtml += "</ul>";
+                        } else {
+                            resultsHtml += "<p>No se encontraron clientes.</p>";
+                        }
+                        $("#resultados_busqueda_cliente").html(resultsHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading clients:", xhr, status, error);
+                        $("#resultados_busqueda_cliente").html("<p>Error al cargar clientes. Intente de nuevo.</p>");
+                    }
+                });
+            });
+
+            $("#resultados_busqueda_cliente").on("click", ".list-group-item", function() {
+                let clienteId = $(this).data("id");
+                let clienteNombre = $(this).data("nombre");
+
+                $("#clienteId").val(clienteId);
+                $("#buscar_cliente").val(clienteNombre);
+                $("#resultados_busqueda_cliente").empty(); // Clear search results
+            });
+
+            calcularTotal();
+            $("#btn_buscar_vino").on("click", function() {
+                let searchTerm = $("#buscar_vino").val();
+                if (searchTerm.length < 1) {
+                    $("#resultados_busqueda_vino").html("<p>Ingrese al menos 1 caracter para buscar.</p>");
+                    return;
+                }
+
+                $.ajax({
+                    url: /*[[@{/cargar-vinos}]]*/ "/cargar-vinos",
+                    data: { term: searchTerm },
+                    dataType: "json",
+                    success: function(data) {
+                        console.log("Data from /cargar-vinos:", data);
+                        let resultsHtml = "";
+                        if (data.length > 0) {
+                            resultsHtml += "<ul class=\"list-group\">";
+                            $.each(data, function(index, item) {
+                                resultsHtml += "<li class=\"list-group-item\" data-id=\"" + item.id + "\" data-nombre=\"" + item.nombre + "\">" + item.nombre + "</li>";
+                            });
+                            resultsHtml += "</ul>";
+                        } else {
+                            resultsHtml += "<p>No se encontraron vinos.</p>";
+                        }
+                        $("#resultados_busqueda_vino").html(resultsHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error loading wines:", xhr, status, error);
+                        $("#resultados_busqueda_vino").html("<p>Error al cargar vinos. Intente de nuevo.</p>");
+                    }
+                });
+            });
+
+            $("#resultados_busqueda_vino").on("click", ".list-group-item", function() {
+                let vinoId = $(this).data("id");
+                let vinoNombre = $(this).data("nombre");
+                let listaPrecioId = $("#listaPrecioId").val();
+
+                $.ajax({
+                    url: "/obtener-precio?vinoId=" + vinoId + "&listaPrecioId=" + listaPrecioId,
+                    dataType: "json",
+                    success: function(precio) {
+                        let linea = $("#plantillaItemsVenta").html();
+
+                        linea = linea.replace(/{ID}/g, vinoId);
+                        linea = linea.replace(/{NOMBRE}/g, vinoNombre);
+                        linea = linea.replace(/{PRECIO}/g, precio);
+                        linea = linea.replace(/{PRECIO_FORMATTED}/g, precio.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                        linea = linea.replace(/{TOTAL_ITEM}/g, precio.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                        $("#items_venta tbody").append(linea);
+                        calcularTotal();
+                        $("#resultados_busqueda_vino").empty(); // Clear search results
+                        $("#buscar_vino").val(""); // Clear search input
+                    }
+                });
+            });
+
+            $("#items_venta").on("change", ".cantidad", function() {
+                let cantidad = $(this).val();
+                let precio = parseFloat($(this).closest("tr").find(".item_precio").val());
+                
+                let totalItem = cantidad * precio;
+                $(this).closest("tr").find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                calcularTotal();
+            });
+        });
+
+        function eliminarItem(btn) {
+            $(btn).closest("tr").remove();
+            calcularTotal();
+        }
+
+        function calcularTotal() {
+            totalVenta = 0;
+            $("#items_venta tbody tr").each(function() {
+                let cantidad = parseInt($(this).find(".cantidad").val());
+                let precio = parseFloat($(this).find(".item_precio").val());
+                if (!isNaN(cantidad) && !isNaN(precio)) {
+                    totalVenta += cantidad * precio;
+                }
+            });
+            $("#total_venta").text(totalVenta.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        }
+    </script>
+
+    <script type="text/template" id="plantillaItemsVenta">
+        <tr class="item_row">
+            <td><input type="hidden" name="item_id[]" value="{ID}">{NOMBRE}</td>
+            <td><input type="hidden" class="item_precio" value="{PRECIO}"><span class="precio_formateado">{PRECIO_FORMATTED}</span></td>
+            <td><input type="number" name="cantidad[]" value="1" class="form-control cantidad" style="width: 60px;"/></td>
+            <td class="total_item">{TOTAL_ITEM}</td>
+            <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
+        </tr>
+    </script>
 </body>
 </html>

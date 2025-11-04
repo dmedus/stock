@@ -9,7 +9,7 @@ import com.stock.entidades.Usuario;
 
 public interface UsuarioService extends UserDetailsService {
 
-	public Usuario guardar(UsuarioDTO registroDTO);
+	public Usuario guardar(Usuario registro);
 	
 	public List<Usuario> listarUsuarios(); 
 	
