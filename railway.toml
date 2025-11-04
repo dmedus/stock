@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "java -jar target/*.jar"
+startCommand = "java -jar target/stock-ventas-1.0.jar"
 buildCommand = "mvn clean package -DskipTests"
