@@ -37,7 +37,7 @@
 						<tr th:each="venta : ${ventas}">
 							<td th:text="${venta.id}"></td>
 							<td th:text="${venta.fecha}"></td>
-							<td th:text="${venta.cliente.nombre}"></td>
+							<td th:text="${venta.cliente.nombre + ' ' + (venta.cliente.apellido != null ? venta.cliente.apellido : '')}"></td>
 							<td th:text="${#numbers.formatCurrency(venta.total)}"></td>
 							<td th:text="${#numbers.formatCurrency(venta.pagado)}"></td>
 							<td th:text="${venta.activo}"></td>

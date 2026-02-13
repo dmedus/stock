@@ -21,7 +21,7 @@
 	                 <div class="form-group row">
                     <label for="buscar_cliente" class="col-sm-2 col-form-label">Buscar Cliente:</label>
                     <div class="col-sm-4">
-                        <input type="text" id="buscar_cliente" class="form-control" th:value="${venta.cliente != null ? venta.cliente.nombre : ''}"/>
+                        <input type="text" id="buscar_cliente" class="form-control" th:value="${venta.cliente != null ? (venta.cliente.nombre + ' ' + (venta.cliente.apellido != null ? venta.cliente.apellido : '')) : ''}"/>
                         <input type="hidden" id="clienteId" name="clienteId" th:value="${venta.cliente != null ? venta.cliente.id : ''}"/>
                         <small id="cliente_seleccionado_msg" class="text-success font-weight-bold" style="display:none;">&#10003; Cliente seleccionado</small>
                     </div>
@@ -29,20 +29,16 @@
                         <button type="button" id="btn_buscar_cliente" class="btn btn-info">Buscar</button>
                     </div>
                  </div>
-                 <div id="resultados_busqueda_cliente" class="mb-3"></div>
-
-	                 
-	                 <div class="form-group row">
-	                    <label class="col-sm-2 col-form-label">Lista de Precio : </label>
-                        <div class="col-sm-6">
-                            <select name="listaPrecioId" id="listaPrecioId" class="form-control">
-                                <option th:each="lista : ${listasPrecio}" th:value="${lista.id}" th:text="${lista.nombre}" th:selected="${venta.listaPrecio != null and venta.listaPrecio.id == lista.id}"></option>
-                            </select>
-                        </div>
-	                 </div>
-
-                     <hr/>
-
+                 	                 <div id="resultados_busqueda_cliente" class="mb-3"></div>
+                 
+                                      <!-- Template hidden for JS cloning -->
+                                      <div style="display:none;">
+                                         <select id="listaPrecioTemplate" class="form-control lista_precio_item_select">
+                                              <option th:each="lista : ${listasPrecio}" th:value="${lista.id}" th:text="${lista.nombre}"></option>
+                                         </select>
+                                      </div>
+                 
+                                      <hr/>
                      <div class="form-group row">
                         <label for="buscar_producto" class="col-sm-2 col-form-label">Buscar Producto:</label>
                         <div class="col-sm-4">
@@ -59,6 +55,7 @@
                         <thead>
                             <tr>
                                 <th>Producto</th>
+                                <th>Lista Precio</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
@@ -72,9 +69,18 @@
                                     <input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> 
                                     <span class="badge badge-primary">Vino</span> <span th:text="${detalle.vino.nombre}"></span>
                                 </td>
+                                <td>
+                                    <select name="lista_precio_item[]" class="form-control lista_precio_item_select">
+                                        <option th:each="lista : ${listasPrecio}" 
+                                                th:value="${lista.id}" 
+                                                th:text="${lista.nombre}" 
+                                                th:selected="${detalle.listaPrecio != null ? (detalle.listaPrecio.id == lista.id) : (venta.listaPrecio != null and venta.listaPrecio.id == lista.id)}">
+                                        </option>
+                                    </select>
+                                </td>
 								<td>
                                     <input type="hidden" class="item_precio" th:value="${detalle.precioUnitario}" /> 
-                                    <span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></span>
+                                    <span class="precio_display" th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></span>
                                 </td>
 								<td>
                                     <input type="number" name="cantidad[]" th:value="${detalle.cantidad}" class="form-control cantidad_input" style="width: 60px;" />
@@ -89,9 +95,13 @@
                                     <input type="hidden" name="combo_id[]" th:value="${detalle.combo.id}" /> 
                                     <span class="badge badge-success">Combo</span> <span th:text="${detalle.combo.nombre}"></span>
                                 </td>
+                                <td>
+                                    <!-- Combos usually don't have dynamic price lists per item in this context, or we disable it -->
+                                    <span class="text-muted">-</span>
+                                </td>
 								<td>
                                     <input type="hidden" class="item_precio" th:value="${detalle.precioUnitario}" /> 
-                                    <span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></span>
+                                    <span class="precio_display" th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 'POINT', 2, 'COMMA')}"></span>
                                 </td>
 								<td>
                                     <input type="number" name="combo_cantidad[]" th:value="${detalle.cantidad}" class="form-control cantidad_input" style="width: 60px;" />
@@ -156,8 +166,9 @@
                         if (data.length > 0) {
                             resultsHtml += "<ul class=\"list-group\">";
                             $.each(data, function(index, item) {
-                                resultsHtml += "<li class=\"list-group-item\" data-id=\"" + item.id + "\" data-nombre=\"" + item.nombre + "\">";
-                                resultsHtml += item.nombre + "</li>";
+                                let fullName = item.nombre + (item.apellido ? " " + item.apellido : "");
+                                resultsHtml += "<li class=\"list-group-item\" data-id=\"" + item.id + "\" data-nombre=\"" + fullName + "\">";
+                                resultsHtml += fullName + "</li>";
                             });
                             resultsHtml += "</ul>";
                         } else {
@@ -192,7 +203,8 @@
                     return;
                 }
                 
-                let listaPrecioId = $("#listaPrecioId").val();
+                // Usar la primera lista del template como referencia por defecto si no hay global
+                let listaPrecioId = $("#listaPrecioTemplate option:first").val();
 
                 // Llamadas paralelas a vinos y combos
                 let requestVinos = $.ajax({
@@ -254,7 +266,8 @@
                 let type = $(this).data("type");
                 let id = $(this).data("id");
                 let nombre = $(this).data("nombre");
-                let listaPrecioId = $("#listaPrecioId").val();
+                // Usar la primera lista del template como referencia por defecto
+                let listaPrecioId = $("#listaPrecioTemplate option:first").val();
                 
                 // Si es Vino, necesitamos buscar el precio
                 if (type === "vino") {
@@ -262,13 +275,13 @@
                         url: "/obtener-precio?vinoId=" + id + "&listaPrecioId=" + listaPrecioId,
                         dataType: "json",
                         success: function(precio) {
-                            agregarFila(type, id, nombre, precio);
+                            agregarFila(type, id, nombre, precio, listaPrecioId);
                         }
                     });
                 } else {
                     // Si es Combo, el precio ya viene en el data-precio
                     let precio = parseFloat($(this).data("precio"));
-                    agregarFila(type, id, nombre, precio);
+                    agregarFila(type, id, nombre, precio, null);
                 }
                 
                 $("#resultados_busqueda").empty();
@@ -283,27 +296,68 @@
                 $(this).closest("tr").find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                 calcularTotal();
             });
+            
+            // --- EVENTO CAMBIO LISTA PRECIO POR ITEM ---
+            $("#items_venta").on("change", ".lista_precio_item_select", function() {
+                let tr = $(this).closest("tr");
+                let listaPrecioId = $(this).val();
+                let vinoIdInput = tr.find("input[name='item_id[]']");
+                
+                // Solo si es un vino (tiene input item_id)
+                if (vinoIdInput.length > 0) {
+                    let vinoId = vinoIdInput.val();
+                    $.ajax({
+                        url: "/obtener-precio?vinoId=" + vinoId + "&listaPrecioId=" + listaPrecioId,
+                        dataType: "json",
+                        success: function(precio) {
+                             tr.find(".item_precio").val(precio);
+                             tr.find(".precio_display").text(precio.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                             
+                             // Recalcular subtotal
+                             let cantidad = tr.find(".cantidad_input").val();
+                             let totalItem = cantidad * precio;
+                             tr.find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                             
+                             calcularTotal();
+                        }
+                    });
+                }
+            });
         });
 
-        function agregarFila(type, id, nombre, precio) {
+        function agregarFila(type, id, nombre, precio, listaPrecioId) {
             let precioFormatted = precio.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
-            let row = `<tr class="item_row">
-`;
+            let row = `<tr class="item_row">`;
             
             if (type === "vino") {
                 row += `<td>
                             <input type="hidden" name="item_id[]" value="${id}">
                             <span class="badge badge-primary">Vino</span> ${nombre}
                         </td>`;
-                row += `<td><input type="hidden" class="item_precio" value="${precio}"><span class="precio_formateado">${precioFormatted}</span></td>`;
+                
+                // Clone select
+                let $select = $("#listaPrecioTemplate").clone();
+                $select.attr("id", ""); // remove id
+                $select.attr("name", "lista_precio_item[]");
+                $select.show(); // ensure it is visible
+                if (listaPrecioId) {
+                    $select.val(listaPrecioId);
+                }
+                // Convert to HTML string
+                let selectHtml = $select.prop('outerHTML');
+                
+                row += `<td>${selectHtml}</td>`;
+                
+                row += `<td><input type="hidden" class="item_precio" value="${precio}"><span class="precio_display">${precioFormatted}</span></td>`;
                 row += `<td><input type="number" name="cantidad[]" value="1" class="form-control cantidad_input" style="width: 60px;"/></td>`;
             } else {
                 row += `<td>
                             <input type="hidden" name="combo_id[]" value="${id}">
                             <span class="badge badge-success">Combo</span> ${nombre}
                         </td>`;
-                row += `<td><input type="hidden" class="item_precio" value="${precio}"><span class="precio_formateado">${precioFormatted}</span></td>`;
+                row += `<td><span class="text-muted">-</span></td>`;
+                row += `<td><input type="hidden" class="item_precio" value="${precio}"><span class="precio_display">${precioFormatted}</span></td>`;
                 row += `<td><input type="number" name="combo_cantidad[]" value="1" class="form-control cantidad_input" style="width: 60px;"/></td>`;
             }
 

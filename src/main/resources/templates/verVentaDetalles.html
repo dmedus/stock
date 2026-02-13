@@ -16,7 +16,7 @@
 				<ul class="list-group mb-3">
 					<li class="list-group-item"><strong>ID Venta:</strong> <span th:text="${venta.id}"></span></li>
 					<li class="list-group-item"><strong>Fecha:</strong> <span th:text="${venta.fecha}"></span></li>
-					<li class="list-group-item"><strong>Cliente:</strong> <span th:text="${venta.cliente.nombre}"></span></li>
+					<li class="list-group-item"><strong>Cliente:</strong> <span th:text="${venta.cliente.nombre + ' ' + (venta.cliente.apellido != null ? venta.cliente.apellido : '')}"></span></li>
 					<li class="list-group-item"><strong>Total:</strong> <span th:text="${#numbers.formatCurrency(venta.total)}"></span></li>
 					<li class="list-group-item"><strong>Pagado:</strong> <span th:text="${#numbers.formatCurrency(venta.pagado)}"></span></li>
 					<li class="list-group-item"><strong>Activo:</strong> <span th:text="${venta.activo}"></span></li>
@@ -27,7 +27,8 @@
 					<thead>
 						<tr>
 							<th>ID Detalle</th>
-							<th>Vino</th>
+							<th>Producto</th>
+                            <th>Lista Precio</th>
 							<th>Cantidad</th>
 							<th>Precio Unitario</th>
 							<th>Precio Caja</th>
@@ -37,7 +38,12 @@
 					<tbody>
 						<tr th:each="detalle : ${venta.detalles}">
 							<td th:text="${detalle.id}"></td>
-							<td th:text="${detalle.vino.nombre}"></td>
+							<td>
+                                <span th:if="${detalle.vino != null}" class="badge badge-primary">Vino</span>
+                                <span th:if="${detalle.combo != null}" class="badge badge-success">Combo</span>
+                                <span th:text="${detalle.vino != null ? detalle.vino.nombre : (detalle.combo != null ? detalle.combo.nombre : 'Desconocido')}"></span>
+                            </td>
+                            <td th:text="${detalle.listaPrecio != null ? detalle.listaPrecio.nombre : 'Global/N/A'}"></td>
 							<td th:text="${detalle.cantidad}"></td>
 							<td th:text="${#numbers.formatCurrency(detalle.precioUnitario)}"></td>
 							<td th:text="${#numbers.formatCurrency(detalle.precioCaja)}"></td>

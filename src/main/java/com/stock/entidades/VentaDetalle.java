@@ -32,6 +32,10 @@ public class VentaDetalle {
     @JoinColumn(nullable = true)
     private Combo combo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true)
+    private ListaPrecio listaPrecio;
+
     @Column(nullable = false)
     private Integer cantidad; // Cantidad de BOTELLAS o COMBOS
 
@@ -75,6 +79,14 @@ public class VentaDetalle {
 
     public void setCombo(Combo combo) {
         this.combo = combo;
+    }
+
+    public ListaPrecio getListaPrecio() {
+        return listaPrecio;
+    }
+
+    public void setListaPrecio(ListaPrecio listaPrecio) {
+        this.listaPrecio = listaPrecio;
     }
 
     public Integer getCantidad() {

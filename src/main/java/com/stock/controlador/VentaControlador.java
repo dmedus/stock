@@ -112,20 +112,19 @@ public class VentaControlador {
                                @RequestParam(required = false) Long listaPrecioId,
                                @RequestParam(name = "item_id[]", required = false) Long[] itemIds,
                                @RequestParam(name = "cantidad[]", required = false) Integer[] cantidades,
+                               @RequestParam(name = "lista_precio_item[]", required = false) Long[] listaPrecioItemIds,
                                @RequestParam(name = "combo_id[]", required = false) Long[] comboIds,
                                @RequestParam(name = "combo_cantidad[]", required = false) Integer[] comboCantidades,
                                RedirectAttributes flash, Model model, SessionStatus status, HttpServletRequest request) {
 
-        System.out.println("--- INTENTANDO GUARDAR VENTA CON COMBOS ---");
+        System.out.println("--- INTENTANDO GUARDAR VENTA CON COMBOS Y PRECIOS VARIABLES ---");
 
         if (clienteId == null) {
              flash.addFlashAttribute("error", "Debe seleccionar un cliente.");
              return "redirect:/ventaForm";
         }
-        if (listaPrecioId == null) {
-             flash.addFlashAttribute("error", "Debe seleccionar una lista de precios.");
-             return "redirect:/ventaForm";
-        }
+        // Removed global listaPrecioId validation
+
         boolean hasItems = (itemIds != null && itemIds.length > 0);
         boolean hasCombos = (comboIds != null && comboIds.length > 0);
         
@@ -135,11 +134,19 @@ public class VentaControlador {
         }
 
         Clientes cliente = clientesService.findById(clienteId);
-        ListaPrecio listaPrecio = listaPrecioService.findById(listaPrecioId);
+        
+        // Obtener una lista de precio por defecto (la primera) solo para referencias globales si fuera necesario
+        // o si un item no trae su propia lista.
+        ListaPrecio listaPrecioDefecto = listaPrecioService.findAll().stream().findFirst().orElse(null);
 
-        if (cliente == null || listaPrecio == null) {
-            flash.addFlashAttribute("error", "Cliente o Lista de Precio no encontrados");
+        if (cliente == null) {
+            flash.addFlashAttribute("error", "Cliente no encontrado");
             return "redirect:/ventaForm";
+        }
+        
+        if (listaPrecioDefecto == null && hasItems) {
+             flash.addFlashAttribute("error", "No hay listas de precios configuradas en el sistema.");
+             return "redirect:/ventaForm";
         }
 
         // --- VALIDACIÓN DE STOCK ACUMULADO ---
@@ -175,7 +182,7 @@ public class VentaControlador {
             Integer stockActual = stockService.getStockTotal(v);
             if (stockActual < entry.getValue()) {
                 model.addAttribute("error", "Stock insuficiente para '" + v.getNombre() + "'. Requerido: " + entry.getValue() + ", Disponible: " + stockActual);
-                prepararModeloParaError(model, id, clienteId, listaPrecioId, itemIds, cantidades, comboIds, comboCantidades);
+                prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades);
                 return "ventaForm";
             }
         }
@@ -194,7 +201,7 @@ public class VentaControlador {
         }
 
         venta.setCliente(cliente);
-        venta.setListaPrecio(listaPrecio);
+        venta.setListaPrecio(listaPrecioDefecto); // Asignamos la por defecto por integridad, aunque ya no se use globalmente
         venta.getDetalles().clear();
 
         BigDecimal total = BigDecimal.ZERO;
@@ -205,16 +212,26 @@ public class VentaControlador {
                 Vino vino = vinoService.findById(itemIds[i]);
                 Integer cantidad = cantidades[i];
                 
-                BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaPrecio);
+                // Determinar lista de precio para este item
+                ListaPrecio listaItem = listaPrecioDefecto;
+                if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
+                    ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
+                    if (li != null) {
+                        listaItem = li;
+                    }
+                }
+                
+                BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
                 if (precioUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                    model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre());
-                    prepararModeloParaError(model, id, clienteId, listaPrecioId, itemIds, cantidades, comboIds, comboCantidades);
+                    model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre() + " en lista " + listaItem.getNombre());
+                    prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades);
                     return "ventaForm";
                 }
 
                 VentaDetalle detalle = new VentaDetalle();
                 detalle.setVino(vino);
                 detalle.setCantidad(cantidad);
+                detalle.setListaPrecio(listaItem);
                 detalle.setPrecioUnitario(precioUnitario);
                 detalle.setPrecioCaja(precioUnitario.multiply(BigDecimal.valueOf(vino.getCantVinosxcaja()))); 
                 BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
@@ -259,7 +276,7 @@ public class VentaControlador {
         return "redirect:/listarVentas";
     }
 
-    private void prepararModeloParaError(Model model, Long ventaId, Long clienteId, Long listaPrecioId, Long[] itemIds, Integer[] cantidades, Long[] comboIds, Integer[] comboCantidades) {
+    private void prepararModeloParaError(Model model, Long ventaId, Long clienteId, Long listaPrecioId, Long[] itemIds, Integer[] cantidades, Long[] listaPrecioItemIds, Long[] comboIds, Integer[] comboCantidades) {
         Venta venta = new Venta();
         if (ventaId != null) {
             venta.setId(ventaId);
@@ -272,10 +289,10 @@ public class VentaControlador {
             venta.setCliente(clientesService.findById(clienteId));
         }
         
-        ListaPrecio listaPrecio = null;
+        ListaPrecio listaPrecioGlobal = null;
         if (listaPrecioId != null) {
-             listaPrecio = listaPrecioService.findById(listaPrecioId);
-             venta.setListaPrecio(listaPrecio);
+             listaPrecioGlobal = listaPrecioService.findById(listaPrecioId);
+             venta.setListaPrecio(listaPrecioGlobal);
         }
         
         // Reconstruir detalles de vinos
@@ -286,8 +303,19 @@ public class VentaControlador {
                      VentaDetalle det = new VentaDetalle();
                      det.setVino(v);
                      det.setCantidad(cantidades[i]);
-                     if (listaPrecio != null) {
-                         BigDecimal precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaPrecio);
+                     
+                     // Reconstruir lista de precio por item
+                     ListaPrecio listaItem = listaPrecioGlobal;
+                     if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
+                         ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
+                         if (li != null) {
+                             listaItem = li;
+                         }
+                     }
+                     det.setListaPrecio(listaItem);
+
+                     if (listaItem != null) {
+                         BigDecimal precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
                          det.setPrecioUnitario(precio);
                          det.setSubtotal(precio.multiply(new BigDecimal(cantidades[i])));
                      }
@@ -385,7 +413,17 @@ public class VentaControlador {
         try {
             for (VentaDetalle detalle : venta.getDetalles()) {
                 if (detalle.getVino() != null) {
-                    stockService.discountStock(detalle.getVino(), detalle.getCantidad());
+                    int cantidadADescontar = detalle.getCantidad();
+                    
+                    // Verificar si la venta fue por caja basándose en el nombre de la lista de precios
+                    if (detalle.getListaPrecio() != null) {
+                        String nombreLista = detalle.getListaPrecio().getNombre().toLowerCase();
+                        if (nombreLista.contains("caja") || nombreLista.contains("mayorista") || nombreLista.contains("bulto")) {
+                            cantidadADescontar = detalle.getCantidad() * detalle.getVino().getCantVinosxcaja();
+                        }
+                    }
+                    
+                    stockService.discountStock(detalle.getVino(), cantidadADescontar);
                 } else if (detalle.getCombo() != null) {
                     Combo combo = detalle.getCombo();
                     Integer cantidadCombos = detalle.getCantidad();
