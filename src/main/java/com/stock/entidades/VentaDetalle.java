@@ -25,11 +25,15 @@ public class VentaDetalle {
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = true)
     private Vino vino;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true)
+    private Combo combo;
+
     @Column(nullable = false)
-    private Integer cantidad; // Cantidad de BOTELLAS
+    private Integer cantidad; // Cantidad de BOTELLAS o COMBOS
 
     @Column(nullable = false)
     private BigDecimal precioUnitario; // Precio por botella
@@ -63,6 +67,14 @@ public class VentaDetalle {
 
     public void setVino(Vino vino) {
         this.vino = vino;
+    }
+
+    public Combo getCombo() {
+        return combo;
+    }
+
+    public void setCombo(Combo combo) {
+        this.combo = combo;
     }
 
     public Integer getCantidad() {

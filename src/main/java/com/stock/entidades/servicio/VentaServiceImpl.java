@@ -30,7 +30,11 @@ public class VentaServiceImpl implements VentaService {
     @Override
     @Transactional(readOnly = true)
     public Venta findById(Long id) {
-        return ventaRepository.findById(id).orElse(null);
+        Venta venta = ventaRepository.findById(id).orElse(null);
+        if(venta != null) {
+        	venta.getDetalles().size();
+        }
+        return venta;
     }
 
     @Override

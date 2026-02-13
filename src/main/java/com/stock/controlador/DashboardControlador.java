@@ -32,7 +32,7 @@ public class DashboardControlador {
         model.addAttribute("totalVinos", vinoService.countAll());
         model.addAttribute("pedidosActivos", pedidoService.countActivePedidos());
         model.addAttribute("ventasRecientes", ventaService.findTop5ByOrderByFechaDesc());
-        model.addAttribute("vinosPocoStock", vinoService.findTop5ByOrderByStockActualAsc());
+        model.addAttribute("vinosFaltantes", vinoService.findVinosBelowMinStock());
         return "dashboard";
     }
 }

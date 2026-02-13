@@ -73,7 +73,7 @@
 			<div class="col-md-6">
 				<div class="card">
 					<div class="card-header">
-						<h5 class="card-title">Vinos con Poco Stock</h5>
+						<h5 class="card-title">Vinos Faltantes (Stock &lt; Mínimo)</h5>
 					</div>
 					<div class="card-body">
 						<table class="table table-striped table-responsive">
@@ -82,13 +82,22 @@
 									<th>ID</th>
 									<th>Nombre</th>
 									<th>Stock Actual</th>
+									<th>Stock Mínimo</th>
+									<th>Acciones</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr th:each="vino : ${vinosPocoStock}">
+								<tr th:each="vino : ${vinosFaltantes}">
 									<td th:text="${vino.id}"></td>
 									<td th:text="${vino.nombre}"></td>
 									<td th:text="${vino.stockActual}"></td>
+									<td th:text="${vino.stockMinimo}"></td>
+									<td><a
+										class="btn btn-warning btn-sm"
+										th:href="@{/vinoForm/} + ${vino.id}">Editar</a></td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(vinosFaltantes)}">
+									<td colspan="5">No hay vinos con stock por debajo del mínimo.</td>
 								</tr>
 							</tbody>
 						</table>

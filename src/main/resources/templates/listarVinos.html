@@ -37,7 +37,7 @@
 							<td th:text="${vino.id}"></td>
 							<td th:text="${vino.nombre}"></td>
 							<td th:text="${vino.bodega.nombre}"></td>
-							<td th:text="${vino.variedad.nombre}"></td>
+							<td th:text="${vino.variedad != null ? vino.variedad.nombre : 'N/A'}"></td>
 							<td th:text="${vino.anioCosecha}"></td>
 							<td th:text="${vino.stockActual}"></td>
 							<td th:text="${vino.stockMinimo}"></td>

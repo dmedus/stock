@@ -61,12 +61,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 		http.authorizeRequests().antMatchers(
 				"/js/**",
 				"/css/**",
-				"/img/**").permitAll()
-		.antMatchers("/admin/**").hasRole(Rol.ADMIN.getNombre())
-        .antMatchers("/user/**").hasRole(Rol.USER.getNombre())
-		.antMatchers("/listarPedidos", "/listarPedidoDetalles", "/verPedidoDetalles/**").hasAnyRole(Rol.USER.getNombre(), Rol.ADMIN.getNombre())
-		.antMatchers("/pedidoForm/**", "/eliminarPedido/**", "/confirmarPedido/**", "/pedidoDetalleForm/**", "/eliminarPedidoDetalle/**").hasRole(Rol.ADMIN.getNombre())
-		.antMatchers("/cargar-vinos/**").permitAll()
+				"/img/**",
+				"/registro").permitAll()
 		.anyRequest().authenticated()
 		.and()
 		.formLogin()

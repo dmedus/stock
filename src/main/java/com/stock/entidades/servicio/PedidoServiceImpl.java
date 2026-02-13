@@ -24,6 +24,9 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private DepositoService depositoService;
+
     @Override
     @Transactional(readOnly = true)
     public List<Pedido> findAll() {
@@ -65,13 +68,26 @@ public class PedidoServiceImpl implements PedidoService {
             Deposito deposito = pedido.getDeposito();
 
             if (deposito == null) {
-                throw new RuntimeException("El pedido no tiene un depósito asignado.");
+                // Auto-assign logic
+                List<Deposito> depositos = depositoService.findAll();
+                if (depositos.isEmpty()) {
+                    deposito = new Deposito();
+                    deposito.setNombre("Depósito Principal");
+                    deposito.setDireccion("Dirección por defecto");
+                    depositoService.save(deposito);
+                } else {
+                    deposito = depositos.get(0);
+                }
+                pedido.setDeposito(deposito);
+                // We don't save pedido here immediately, it will be saved at the end
             }
 
             for (PedidoDetalle detalle : pedido.getDetalles()) {
                 Vino vino = detalle.getVino();
                 if (vino != null) {
                     Integer cantidad = detalle.getCantidad();
+                    // cantidad is total bottles. Assuming stock is in bottles.
+                    
                     Stock stock = stockService.findByVinoAndDeposito(vino, deposito);
                     if (stock != null) {
                         stock.setCantidad(stock.getCantidad() + cantidad);

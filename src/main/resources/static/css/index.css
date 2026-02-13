@@ -3,9 +3,15 @@ body{
     background-size: cover;
 }
 
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 .main-section{
     margin:0 auto;
-    margin-top:15%;
     padding: 0;
 }
 
@@ -59,21 +65,4 @@ button{
     color: white;
 }
 
-@media (max-width: 768px) {
-    .main-section {
-        margin-top: 10%;
-    }
-    .modal-dialog {
-        max-width: 500px;
-    }
-}
 
-@media (max-width: 576px) {
-    .main-section {
-        margin-top: 20%;
-    }
-    .modal-dialog {
-        max-width: 90%;
-        margin: auto;
-    }
-}

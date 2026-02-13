@@ -44,8 +44,12 @@ public class StockServiceImpl implements StockService {
     @Override
     @Transactional
     public void discountStock(Vino vino, Integer cantidad) {
+        System.out.println("Intentando descontar stock. Vino: " + vino.getNombre() + ", Cantidad a descontar: " + cantidad);
         Integer stockTotal = getStockTotal(vino);
+        System.out.println("Stock total actual para " + vino.getNombre() + ": " + stockTotal);
+
         if (stockTotal < cantidad) {
+            System.err.println("Error: No hay suficiente stock. Disponible: " + stockTotal + ", Solicitado: " + cantidad);
             throw new RuntimeException("No hay suficiente stock para el vino: " + vino.getNombre());
         }
 
@@ -57,14 +61,18 @@ public class StockServiceImpl implements StockService {
                 break;
             }
 
+            System.out.println("Procesando stock ID: " + stock.getId() + ", Cantidad en depósito: " + stock.getCantidad());
+
             if (stock.getCantidad() >= cantidadRestante) {
                 stock.setCantidad(stock.getCantidad() - cantidadRestante);
                 cantidadRestante = 0;
                 stockRepository.save(stock);
+                System.out.println("Stock ID " + stock.getId() + " actualizado. Nuevo stock: " + stock.getCantidad());
             } else {
                 cantidadRestante -= stock.getCantidad();
                 stock.setCantidad(0);
                 stockRepository.save(stock);
+                System.out.println("Stock ID " + stock.getId() + " vaciado. Cantidad restante a descontar: " + cantidadRestante);
             }
         }
     }

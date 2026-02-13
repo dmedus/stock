@@ -11,4 +11,5 @@ public interface VinoService {
     public List<Vino> findByNombre(String term);
     public long countAll();
     public List<Vino> findTop5ByOrderByStockActualAsc();
+    public List<Vino> findVinosBelowMinStock();
 }

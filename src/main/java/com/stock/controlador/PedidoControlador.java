@@ -79,6 +79,7 @@ public class PedidoControlador {
                 pedidoAGuardar.setObservaciones(pedido.getObservaciones());
                 pedidoAGuardar.setPagado(pedido.getPagado());
                 pedidoAGuardar.setActivo(pedido.getActivo());
+                pedidoAGuardar.setDeposito(pedido.getDeposito());
                 pedidoAGuardar.getDetalles().clear();
             } else {
                 pedidoAGuardar = pedido;

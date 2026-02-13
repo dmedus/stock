@@ -35,8 +35,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.stock.repositorio.ComboRepository;
+import com.stock.entidades.Combo;
+import java.util.HashMap;
+
 @Controller
 public class VentaControlador {
+
+    @Autowired
+    private ComboRepository comboRepository;
 
     @Autowired
     private ClientesService clientesService;
@@ -55,6 +62,11 @@ public class VentaControlador {
 
     @Autowired
     private StockService stockService;
+
+    @GetMapping(value = "/cargar-combos", produces = {"application/json"})
+    public @ResponseBody List<Combo> cargarCombos(@RequestParam("term") String term) {
+        return comboRepository.findByNombreContainingIgnoreCase(term);
+    }
 
     @GetMapping({"/ventaForm", "/ventaForm/{id}"})
     public String crearVenta(@PathVariable(name = "id", required = false) Long id, Map<String, Object> model, RedirectAttributes flash) {
@@ -96,17 +108,30 @@ public class VentaControlador {
 
     @PostMapping({"/guardarVenta", "/guardarVenta/{id}"})
     public String guardarVenta(@PathVariable(name = "id", required = false) Long id,
-                               @RequestParam Long clienteId,
-                               @RequestParam Long listaPrecioId,
+                               @RequestParam(required = false) Long clienteId,
+                               @RequestParam(required = false) Long listaPrecioId,
                                @RequestParam(name = "item_id[]", required = false) Long[] itemIds,
                                @RequestParam(name = "cantidad[]", required = false) Integer[] cantidades,
-                               RedirectAttributes flash, SessionStatus status, HttpServletRequest request) {
+                               @RequestParam(name = "combo_id[]", required = false) Long[] comboIds,
+                               @RequestParam(name = "combo_cantidad[]", required = false) Integer[] comboCantidades,
+                               RedirectAttributes flash, Model model, SessionStatus status, HttpServletRequest request) {
 
-        System.out.println(request.getParameterMap());
+        System.out.println("--- INTENTANDO GUARDAR VENTA CON COMBOS ---");
 
-        if (itemIds == null || itemIds.length == 0) {
-            flash.addFlashAttribute("error", "La venta no puede estar vacía");
-            return "redirect:/ventaForm";
+        if (clienteId == null) {
+             flash.addFlashAttribute("error", "Debe seleccionar un cliente.");
+             return "redirect:/ventaForm";
+        }
+        if (listaPrecioId == null) {
+             flash.addFlashAttribute("error", "Debe seleccionar una lista de precios.");
+             return "redirect:/ventaForm";
+        }
+        boolean hasItems = (itemIds != null && itemIds.length > 0);
+        boolean hasCombos = (comboIds != null && comboIds.length > 0);
+        
+        if (!hasItems && !hasCombos) {
+             flash.addFlashAttribute("error", "La venta no puede estar vacía");
+             return "redirect:/ventaForm";
         }
 
         Clientes cliente = clientesService.findById(clienteId);
@@ -116,6 +141,45 @@ public class VentaControlador {
             flash.addFlashAttribute("error", "Cliente o Lista de Precio no encontrados");
             return "redirect:/ventaForm";
         }
+
+        // --- VALIDACIÓN DE STOCK ACUMULADO ---
+        Map<Long, Integer> demandaPorVino = new HashMap<>();
+
+        // 1. Sumar demanda de vinos individuales
+        if (hasItems) {
+            for (int i = 0; i < itemIds.length; i++) {
+                Long vinoId = itemIds[i];
+                Integer cant = cantidades[i];
+                demandaPorVino.put(vinoId, demandaPorVino.getOrDefault(vinoId, 0) + cant);
+            }
+        }
+
+        // 2. Sumar demanda de vinos por combos
+        if (hasCombos) {
+            for (int i = 0; i < comboIds.length; i++) {
+                Long comboId = comboIds[i];
+                Integer cantCombo = comboCantidades[i];
+                Combo combo = comboRepository.findById(comboId).orElse(null);
+                if (combo != null) {
+                    for (Vino v : combo.getVinos()) {
+                        // Asumimos 1 botella por vino en la lista del combo
+                        demandaPorVino.put(v.getId(), demandaPorVino.getOrDefault(v.getId(), 0) + cantCombo);
+                    }
+                }
+            }
+        }
+
+        // 3. Verificar contra stock
+        for (Map.Entry<Long, Integer> entry : demandaPorVino.entrySet()) {
+            Vino v = vinoService.findById(entry.getKey());
+            Integer stockActual = stockService.getStockTotal(v);
+            if (stockActual < entry.getValue()) {
+                model.addAttribute("error", "Stock insuficiente para '" + v.getNombre() + "'. Requerido: " + entry.getValue() + ", Disponible: " + stockActual);
+                prepararModeloParaError(model, id, clienteId, listaPrecioId, itemIds, cantidades, comboIds, comboCantidades);
+                return "ventaForm";
+            }
+        }
+        // -------------------------------------
 
         Venta venta;
         if (id != null) {
@@ -131,39 +195,61 @@ public class VentaControlador {
 
         venta.setCliente(cliente);
         venta.setListaPrecio(listaPrecio);
-
-        // Clear existing details to replace them with the new ones
         venta.getDetalles().clear();
 
         BigDecimal total = BigDecimal.ZERO;
 
-        for (int i = 0; i < itemIds.length; i++) {
-            Long vinoId = itemIds[i];
-            Integer cantidad = cantidades[i];
+        // Procesar Vinos Individuales
+        if (hasItems) {
+            for (int i = 0; i < itemIds.length; i++) {
+                Vino vino = vinoService.findById(itemIds[i]);
+                Integer cantidad = cantidades[i];
+                
+                BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaPrecio);
+                if (precioUnitario.compareTo(BigDecimal.ZERO) == 0) {
+                    model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre());
+                    prepararModeloParaError(model, id, clienteId, listaPrecioId, itemIds, cantidades, comboIds, comboCantidades);
+                    return "ventaForm";
+                }
 
-            Vino vino = vinoService.findById(vinoId);
-            if (vino == null) {
-                flash.addFlashAttribute("error", "Vino no encontrado con ID: " + vinoId);
-                return "redirect:/ventaForm";
+                VentaDetalle detalle = new VentaDetalle();
+                detalle.setVino(vino);
+                detalle.setCantidad(cantidad);
+                detalle.setPrecioUnitario(precioUnitario);
+                detalle.setPrecioCaja(precioUnitario.multiply(BigDecimal.valueOf(vino.getCantVinosxcaja()))); 
+                BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+                detalle.setSubtotal(subtotal);
+                detalle.setVenta(venta);
+                venta.getDetalles().add(detalle);
+
+                total = total.add(subtotal);
             }
+        }
 
-            BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaPrecio);
-            if (precioUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                flash.addFlashAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre() + " en la lista de precios seleccionada.");
-                return "redirect:/ventaForm";
+        // Procesar Combos
+        if (hasCombos) {
+            for (int i = 0; i < comboIds.length; i++) {
+                Combo combo = comboRepository.findById(comboIds[i]).orElse(null);
+                if (combo != null) {
+                    Integer cantidad = comboCantidades[i];
+                    VentaDetalle detalle = new VentaDetalle();
+                    detalle.setCombo(combo);
+                    detalle.setCantidad(cantidad);
+                    // Para combos, usamos el precio del combo directo (o se podría calcular)
+                    // Aquí asumimos que el precio del combo es fijo y global, o se ajusta por lista de precios si existiera lógica.
+                    // Usaremos combo.getPrecio() como base.
+                    BigDecimal precioUnitario = BigDecimal.valueOf(combo.getPrecio());
+                    
+                    detalle.setPrecioUnitario(precioUnitario);
+                    detalle.setPrecioCaja(precioUnitario); // En combos no aplica "caja" igual, ponemos mismo precio
+                    BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+                    detalle.setSubtotal(subtotal);
+                    detalle.setVenta(venta);
+                    venta.getDetalles().add(detalle);
+                    
+                    total = total.add(subtotal);
+                }
             }
-
-            VentaDetalle detalle = new VentaDetalle();
-            detalle.setVino(vino);
-            detalle.setCantidad(cantidad);
-            detalle.setPrecioUnitario(precioUnitario);
-            detalle.setPrecioCaja(precioUnitario.multiply(BigDecimal.valueOf(vino.getCantVinosxcaja()))); // Assuming precioCaja is price per bottle * bottles per box
-            BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
-            detalle.setSubtotal(subtotal);
-            detalle.setVenta(venta);
-            venta.getDetalles().add(detalle);
-
-            total = total.add(subtotal);
         }
 
         venta.setTotal(total);
@@ -171,6 +257,64 @@ public class VentaControlador {
         status.setComplete();
         flash.addFlashAttribute("success", "Venta guardada con éxito");
         return "redirect:/listarVentas";
+    }
+
+    private void prepararModeloParaError(Model model, Long ventaId, Long clienteId, Long listaPrecioId, Long[] itemIds, Integer[] cantidades, Long[] comboIds, Integer[] comboCantidades) {
+        Venta venta = new Venta();
+        if (ventaId != null) {
+            venta.setId(ventaId);
+            venta.setFecha(ventaService.findById(ventaId).getFecha());
+        } else {
+             venta.setFecha(LocalDate.now());
+        }
+
+        if (clienteId != null) {
+            venta.setCliente(clientesService.findById(clienteId));
+        }
+        
+        ListaPrecio listaPrecio = null;
+        if (listaPrecioId != null) {
+             listaPrecio = listaPrecioService.findById(listaPrecioId);
+             venta.setListaPrecio(listaPrecio);
+        }
+        
+        // Reconstruir detalles de vinos
+        if (itemIds != null && cantidades != null) {
+             for(int i=0; i<itemIds.length; i++) {
+                 Vino v = vinoService.findById(itemIds[i]);
+                 if(v != null) {
+                     VentaDetalle det = new VentaDetalle();
+                     det.setVino(v);
+                     det.setCantidad(cantidades[i]);
+                     if (listaPrecio != null) {
+                         BigDecimal precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaPrecio);
+                         det.setPrecioUnitario(precio);
+                         det.setSubtotal(precio.multiply(new BigDecimal(cantidades[i])));
+                     }
+                     venta.getDetalles().add(det);
+                 }
+             }
+        }
+
+        // Reconstruir detalles de combos
+        if (comboIds != null && comboCantidades != null) {
+            for(int i=0; i<comboIds.length; i++) {
+                Combo c = comboRepository.findById(comboIds[i]).orElse(null);
+                if(c != null) {
+                    VentaDetalle det = new VentaDetalle();
+                    det.setCombo(c);
+                    det.setCantidad(comboCantidades[i]);
+                    BigDecimal precio = BigDecimal.valueOf(c.getPrecio());
+                    det.setPrecioUnitario(precio);
+                    det.setSubtotal(precio.multiply(new BigDecimal(comboCantidades[i])));
+                    venta.getDetalles().add(det);
+                }
+            }
+        }
+        
+        model.addAttribute("venta", venta);
+        model.addAttribute("listasPrecio", listaPrecioService.findAll());
+        model.addAttribute("titulo", (ventaId != null) ? "Editar Venta" : "Crear Venta");
     }
 
     @GetMapping("/listarVentas")
@@ -240,7 +384,16 @@ public class VentaControlador {
 
         try {
             for (VentaDetalle detalle : venta.getDetalles()) {
-                stockService.discountStock(detalle.getVino(), detalle.getCantidad());
+                if (detalle.getVino() != null) {
+                    stockService.discountStock(detalle.getVino(), detalle.getCantidad());
+                } else if (detalle.getCombo() != null) {
+                    Combo combo = detalle.getCombo();
+                    Integer cantidadCombos = detalle.getCantidad();
+                    // Iterate wines in the combo and discount based on combo quantity
+                    for (Vino v : combo.getVinos()) {
+                        stockService.discountStock(v, cantidadCombos);
+                    }
+                }
             }
 
             venta.setEntregado(true);

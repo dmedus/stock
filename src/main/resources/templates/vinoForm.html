@@ -49,6 +49,10 @@
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('stockMinimo')}" th:errors="*{stockMinimo}"></small> 
 	                 </div>
 	                 <div class="form-group">
+	                    <label>Stock Actual : </label>
+						<input type="number" th:field="*{stockActual}" class="form-control" th:errorclass="'form-control alert-danger'"/>
+	                 </div>
+	                 <div class="form-group">
 	                    <label>Cantidad Vinos por Caja : </label>
 						<input type="number" th:field="*{cantVinosxcaja}" class="form-control" th:errorclass="'form-control alert-danger'"/>
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('cantVinosxcaja')}" th:errors="*{cantVinosxcaja}"></small> 
