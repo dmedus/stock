@@ -74,6 +74,7 @@ public class UsuarioControlador {
 				flash.addFlashAttribute("error", "El ID del Usuario no existe en la base de datos");
 				return "redirect:/listarUsuarios";
 			}
+			usuario.setPassword(null);
 		}
 		else {
 			flash.addFlashAttribute("error", "El ID del Usuario no puede ser cero");
@@ -81,7 +82,7 @@ public class UsuarioControlador {
 		}
 		
 		modelo.put("usuario",usuario);
-		modelo.put("editar",false);
+		modelo.put("editar",true);
 		modelo.put("titulo", "Edición de Usuario");
 		return "usuarioForm";
 	}

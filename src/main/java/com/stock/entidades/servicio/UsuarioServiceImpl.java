@@ -24,10 +24,27 @@ public class UsuarioServiceImpl implements UsuarioService{
 	private BCryptPasswordEncoder passwordEncoder;
 	
 	@Override
+	@Transactional
 	public Usuario guardar(Usuario registroDTO) {
-		Usuario usuario = new Usuario(registroDTO.getId(),registroDTO.getNombre(), 
-				registroDTO.getApellido(),registroDTO.getUsuario(),registroDTO.getEmail(),
-				passwordEncoder.encode(registroDTO.getPassword()),registroDTO.getRol() );
+		if (registroDTO.getId() != null) {
+			Usuario usuarioExistente = repository.findById(registroDTO.getId()).orElse(null);
+			if (usuarioExistente != null) {
+				usuarioExistente.setNombre(registroDTO.getNombre());
+				usuarioExistente.setApellido(registroDTO.getApellido());
+				usuarioExistente.setUsuario(registroDTO.getUsuario());
+				usuarioExistente.setEmail(registroDTO.getEmail());
+				usuarioExistente.setRol(registroDTO.getRol());
+				
+				if (registroDTO.getPassword() != null && !registroDTO.getPassword().isEmpty()) {
+					usuarioExistente.setPassword(passwordEncoder.encode(registroDTO.getPassword()));
+				}
+				return repository.save(usuarioExistente);
+			}
+		}
+		
+		Usuario usuario = new Usuario(registroDTO.getId(), registroDTO.getNombre(), 
+				registroDTO.getApellido(), registroDTO.getUsuario(), registroDTO.getEmail(),
+				passwordEncoder.encode(registroDTO.getPassword()), registroDTO.getRol());
 		return repository.save(usuario);
 	}
 
