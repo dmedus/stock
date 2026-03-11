@@ -83,9 +83,9 @@
                                         <option th:each="lista : ${listasPrecio}" 
                                                 th:value="${lista.id}" 
                                                 th:text="${lista.nombre}" 
-                                                th:selected="${detalle.listaPrecio != null ? (detalle.listaPrecio.id == lista.id) : (venta.listaPrecio != null and venta.listaPrecio.id == lista.id)}">
+                                                th:selected="${detalle.promoSeis != true and (detalle.listaPrecio != null ? (detalle.listaPrecio.id == lista.id) : (venta.listaPrecio != null and venta.listaPrecio.id == lista.id))}">
                                         </option>
-                                        <option value="-1">Descuento * 6</option>
+                                        <option value="-1" th:selected="${detalle.promoSeis == true}">Descuento * 6</option>
                                     </select>
                                 </td>
 								<td>

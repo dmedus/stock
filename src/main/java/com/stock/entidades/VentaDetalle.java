@@ -48,6 +48,8 @@ public class VentaDetalle {
     @Column(nullable = false)
     private BigDecimal subtotal; // cantidad * precioCaja
 
+    private Boolean promoSeis = false;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -55,6 +57,14 @@ public class VentaDetalle {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Boolean getPromoSeis() {
+        return promoSeis;
+    }
+
+    public void setPromoSeis(Boolean promoSeis) {
+        this.promoSeis = promoSeis;
     }
 
     public Venta getVenta() {

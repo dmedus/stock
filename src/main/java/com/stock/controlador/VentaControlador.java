@@ -251,9 +251,11 @@ public class VentaControlador {
                 // Determinar lista de precio para este item
                 ListaPrecio listaItem = listaPrecioDefecto;
                 BigDecimal precioUnitario = BigDecimal.ZERO;
+                boolean isPromoSeis = false;
 
                 if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
                     if (listaPrecioItemIds[i] == -1L) {
+                        isPromoSeis = true;
                         listaItem = findCajaListaPrecio();
                         if (listaItem != null) {
                             BigDecimal precioCaja = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
@@ -283,6 +285,7 @@ public class VentaControlador {
                 detalle.setCantidad(cantidad);
                 detalle.setListaPrecio(listaItem);
                 detalle.setPrecioUnitario(precioUnitario);
+                detalle.setPromoSeis(isPromoSeis);
                 detalle.setPrecioCaja(precioUnitario.multiply(BigDecimal.valueOf(vino.getCantVinosxcaja()))); 
                 BigDecimal subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
                 detalle.setSubtotal(subtotal);
@@ -356,8 +359,10 @@ public class VentaControlador {
                      // Reconstruir lista de precio por item
                      ListaPrecio listaItem = listaPrecioGlobal;
                      BigDecimal precio = BigDecimal.ZERO;
+                     boolean isPromoSeis = false;
                      if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
                          if (listaPrecioItemIds[i] == -1L) {
+                             isPromoSeis = true;
                              listaItem = findCajaListaPrecio();
                              if (listaItem != null) {
                                  BigDecimal precioCaja = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
@@ -378,6 +383,7 @@ public class VentaControlador {
                      
                      det.setListaPrecio(listaItem);
                      det.setPrecioUnitario(precio);
+                     det.setPromoSeis(isPromoSeis);
                      det.setSubtotal(precio.multiply(new BigDecimal(cantidades[i])));
                      venta.getDetalles().add(det);
                  }
