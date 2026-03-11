@@ -406,10 +406,29 @@ public class VentaControlador {
     }
 
     @GetMapping("/listarVentas")
-    public String listarVentas(Model model) {
-        List<Venta> ventas = ventaService.findAll();
+    public String listarVentas(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+                               @RequestParam(required = false) String cliente,
+                               @RequestParam(required = false) Boolean activo,
+                               Model model) {
+        
+        List<Venta> ventas;
+        
+        // Si se realiza una búsqueda (al menos un parámetro está presente)
+        if (fechaInicio != null || fechaFin != null || (cliente != null && !cliente.isEmpty()) || activo != null) {
+            ventas = ventaService.searchVentas(fechaInicio, fechaFin, cliente, activo);
+        } else {
+            // Por defecto solo mostramos las activas
+            ventas = ventaService.findByActivoTrue();
+        }
+
         model.addAttribute("titulo", "Listado de Ventas");
         model.addAttribute("ventas", ventas);
+        model.addAttribute("fechaInicio", fechaInicio);
+        model.addAttribute("fechaFin", fechaFin);
+        model.addAttribute("cliente", cliente);
+        model.addAttribute("activo", activo);
+        
         return "listarVentas";
     }
 

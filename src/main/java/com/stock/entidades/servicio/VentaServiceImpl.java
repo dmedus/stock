@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -29,7 +30,18 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Venta findById(Long id) {
+    public List<Venta> findByActivoTrue() {
+        return ventaRepository.findByActivoTrue();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Venta> searchVentas(LocalDate fechaInicio, LocalDate fechaFin, String clienteNombre, Boolean activo) {
+        return ventaRepository.searchVentas(fechaInicio, fechaFin, clienteNombre, activo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)    public Venta findById(Long id) {
         Venta venta = ventaRepository.findById(id).orElse(null);
         if(venta != null) {
         	venta.getDetalles().size();
