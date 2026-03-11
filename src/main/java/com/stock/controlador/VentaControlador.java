@@ -4,6 +4,9 @@ import com.stock.entidades.Venta;
 import com.stock.entidades.VentaDetalle;
 import com.stock.entidades.servicio.VentaService;
 import com.stock.entidades.servicio.VentaDetalleService;
+import com.stock.entidades.servicio.UsuarioService;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.stock.entidades.Clientes;
@@ -63,6 +66,9 @@ public class VentaControlador {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     @GetMapping(value = "/cargar-combos", produces = {"application/json"})
     public @ResponseBody List<Combo> cargarCombos(@RequestParam("term") String term) {
         return comboRepository.findByNombreContainingIgnoreCase(term);
@@ -115,6 +121,8 @@ public class VentaControlador {
                                @RequestParam(name = "lista_precio_item[]", required = false) Long[] listaPrecioItemIds,
                                @RequestParam(name = "combo_id[]", required = false) Long[] comboIds,
                                @RequestParam(name = "combo_cantidad[]", required = false) Integer[] comboCantidades,
+                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+                               Authentication authentication,
                                RedirectAttributes flash, Model model, SessionStatus status, HttpServletRequest request) {
 
         System.out.println("--- INTENTANDO GUARDAR VENTA CON COMBOS Y PRECIOS VARIABLES ---");
@@ -182,7 +190,7 @@ public class VentaControlador {
             Integer stockActual = stockService.getStockTotal(v);
             if (stockActual < entry.getValue()) {
                 model.addAttribute("error", "Stock insuficiente para '" + v.getNombre() + "'. Requerido: " + entry.getValue() + ", Disponible: " + stockActual);
-                prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades);
+                prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades, fecha);
                 return "ventaForm";
             }
         }
@@ -197,7 +205,12 @@ public class VentaControlador {
             }
         } else {
             venta = new Venta();
-            venta.setFecha(LocalDate.now());
+        }
+
+        venta.setFecha(fecha != null ? fecha : LocalDate.now());
+
+        if (authentication != null) {
+            venta.setUsuario(usuarioService.findByUsuario(authentication.getName()));
         }
 
         venta.setCliente(cliente);
@@ -224,7 +237,7 @@ public class VentaControlador {
                 BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
                 if (precioUnitario.compareTo(BigDecimal.ZERO) == 0) {
                     model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre() + " en lista " + listaItem.getNombre());
-                    prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades);
+                    prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades, fecha);
                     return "ventaForm";
                 }
 
@@ -276,14 +289,13 @@ public class VentaControlador {
         return "redirect:/listarVentas";
     }
 
-    private void prepararModeloParaError(Model model, Long ventaId, Long clienteId, Long listaPrecioId, Long[] itemIds, Integer[] cantidades, Long[] listaPrecioItemIds, Long[] comboIds, Integer[] comboCantidades) {
+    private void prepararModeloParaError(Model model, Long ventaId, Long clienteId, Long listaPrecioId, Long[] itemIds, Integer[] cantidades, Long[] listaPrecioItemIds, Long[] comboIds, Integer[] comboCantidades, LocalDate fecha) {
         Venta venta = new Venta();
         if (ventaId != null) {
             venta.setId(ventaId);
-            venta.setFecha(ventaService.findById(ventaId).getFecha());
-        } else {
-             venta.setFecha(LocalDate.now());
         }
+        
+        venta.setFecha(fecha != null ? fecha : LocalDate.now());
 
         if (clienteId != null) {
             venta.setCliente(clientesService.findById(clienteId));

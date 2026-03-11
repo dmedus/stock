@@ -15,6 +15,8 @@ public interface UsuarioService extends UserDetailsService {
 	
 	public Usuario findOne(Long id);
 	
+	public Usuario findByUsuario(String usuario);
+	
 	public void delete(Long id); 
 	
 }

@@ -34,6 +34,9 @@ public class Venta {
     private Clientes cliente;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private ListaPrecio listaPrecio;
 
     @Column(columnDefinition = "TEXT")
@@ -77,6 +80,14 @@ public class Venta {
 
     public void setCliente(Clientes cliente) {
         this.cliente = cliente;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public ListaPrecio getListaPrecio() {

@@ -55,6 +55,12 @@ public class UsuarioServiceImpl implements UsuarioService{
 	}
 
 	@Override
+	@Transactional(readOnly = true)
+	public Usuario findByUsuario(String usuario) {
+		return repository.findByUsuario(usuario);
+	}
+
+	@Override
 	@Transactional
 	public void delete(Long id) {
 		repository.deleteById(id);
