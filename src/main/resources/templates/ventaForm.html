@@ -33,7 +33,7 @@
                  <div class="form-group row">
                     <label for="fecha" class="col-sm-2 col-form-label">Fecha:</label>
                     <div class="col-sm-4">
-                        <input type="date" id="fecha" name="fecha" class="form-control" th:value="${venta.fecha != null ? venta.fecha : #temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"/>
+                        <input type="date" id="fecha" name="fecha" class="form-control" th:value="${venta.fecha}"/>
                     </div>
                  </div>
 

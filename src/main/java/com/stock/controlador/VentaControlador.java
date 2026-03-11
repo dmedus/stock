@@ -88,6 +88,7 @@ public class VentaControlador {
             model.put("titulo", "Editar Venta");
         } else {
             Venta venta = new Venta();
+            venta.setFecha(LocalDate.now());
             model.put("venta", venta);
             model.put("titulo", "Crear Venta");
         }
