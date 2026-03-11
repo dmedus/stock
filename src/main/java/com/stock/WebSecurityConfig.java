@@ -71,7 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 		.formLogin()
 		.loginPage("/login")
 		.permitAll()
-		.defaultSuccessUrl("/listarClientes", true)
+		.defaultSuccessUrl("/", true)
 		.and()
 		.logout()
 		.invalidateHttpSession(true)

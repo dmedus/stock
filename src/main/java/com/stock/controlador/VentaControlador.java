@@ -99,10 +99,32 @@ public class VentaControlador {
     }
 
 
+    private ListaPrecio findCajaListaPrecio() {
+        return listaPrecioService.findAll().stream()
+                .filter(l -> l.getNombre().toLowerCase().contains("caja"))
+                .findFirst()
+                .orElse(null);
+    }
+
     @GetMapping("/obtener-precio")
     @ResponseBody
     public BigDecimal obtenerPrecio(@RequestParam Long vinoId, @RequestParam Long listaPrecioId) {
         Vino vino = vinoService.findById(vinoId);
+        if (vino == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (listaPrecioId != null && listaPrecioId == -1L) {
+            ListaPrecio listaCaja = findCajaListaPrecio();
+            if (listaCaja != null) {
+                BigDecimal precioCaja = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaCaja);
+                if (precioCaja != null && precioCaja.compareTo(BigDecimal.ZERO) > 0) {
+                    return precioCaja.divide(BigDecimal.valueOf(vino.getCantVinosxcaja()), 2, java.math.RoundingMode.HALF_UP);
+                }
+            }
+            return BigDecimal.ZERO;
+        }
+
         ListaPrecio listaPrecio = listaPrecioService.findById(listaPrecioId);
         if (vino != null && listaPrecio != null) {
             return precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaPrecio);
@@ -228,16 +250,30 @@ public class VentaControlador {
                 
                 // Determinar lista de precio para este item
                 ListaPrecio listaItem = listaPrecioDefecto;
+                BigDecimal precioUnitario = BigDecimal.ZERO;
+
                 if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
-                    ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
-                    if (li != null) {
-                        listaItem = li;
+                    if (listaPrecioItemIds[i] == -1L) {
+                        listaItem = findCajaListaPrecio();
+                        if (listaItem != null) {
+                            BigDecimal precioCaja = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
+                            if (precioCaja != null) {
+                                precioUnitario = precioCaja.divide(BigDecimal.valueOf(vino.getCantVinosxcaja()), 2, java.math.RoundingMode.HALF_UP);
+                            }
+                        }
+                    } else {
+                        ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
+                        if (li != null) {
+                            listaItem = li;
+                            precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
+                        }
                     }
+                } else {
+                    precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
                 }
                 
-                BigDecimal precioUnitario = precioVinoService.findPrecioByVinoAndListaPrecio(vino, listaItem);
                 if (precioUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                    model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre() + " en lista " + listaItem.getNombre());
+                    model.addAttribute("error", "Precio no encontrado para el vino: " + vino.getNombre() + (listaItem != null ? " en lista " + listaItem.getNombre() : ""));
                     prepararModeloParaError(model, id, clienteId, null, itemIds, cantidades, listaPrecioItemIds, comboIds, comboCantidades, fecha);
                     return "ventaForm";
                 }
@@ -319,19 +355,30 @@ public class VentaControlador {
                      
                      // Reconstruir lista de precio por item
                      ListaPrecio listaItem = listaPrecioGlobal;
+                     BigDecimal precio = BigDecimal.ZERO;
                      if (listaPrecioItemIds != null && i < listaPrecioItemIds.length && listaPrecioItemIds[i] != null) {
-                         ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
-                         if (li != null) {
-                             listaItem = li;
+                         if (listaPrecioItemIds[i] == -1L) {
+                             listaItem = findCajaListaPrecio();
+                             if (listaItem != null) {
+                                 BigDecimal precioCaja = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
+                                 if (precioCaja != null) {
+                                     precio = precioCaja.divide(BigDecimal.valueOf(v.getCantVinosxcaja()), 2, java.math.RoundingMode.HALF_UP);
+                                 }
+                             }
+                         } else {
+                             ListaPrecio li = listaPrecioService.findById(listaPrecioItemIds[i]);
+                             if (li != null) {
+                                 listaItem = li;
+                                 precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
+                             }
                          }
+                     } else if (listaItem != null) {
+                         precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
                      }
+                     
                      det.setListaPrecio(listaItem);
-
-                     if (listaItem != null) {
-                         BigDecimal precio = precioVinoService.findPrecioByVinoAndListaPrecio(v, listaItem);
-                         det.setPrecioUnitario(precio);
-                         det.setSubtotal(precio.multiply(new BigDecimal(cantidades[i])));
-                     }
+                     det.setPrecioUnitario(precio);
+                     det.setSubtotal(precio.multiply(new BigDecimal(cantidades[i])));
                      venta.getDetalles().add(det);
                  }
              }

@@ -20,8 +20,8 @@
 	                 <div class="form-group row">
 	                    <label for="buscar_vino" class="col-sm-2 col-form-label">Vino : </label>
                         <div class="col-sm-4">
-						    <input type="text" id="buscar_vino" class="form-control"/>
-						    <input type="hidden" th:field="*{vino}" />
+						    <input type="text" id="buscar_vino" class="form-control" th:value="${precioVino.vino != null ? precioVino.vino.nombre : ''}"/>
+						    <input type="hidden" id="vinoId" name="vino" th:value="${precioVino.vino != null ? precioVino.vino.id : ''}" />
                         </div>
                         <div class="col-sm-2">
                             <button type="button" id="btn_buscar_vino" class="btn btn-info">Buscar</button>
@@ -37,7 +37,7 @@
 	                 </div>
 	                 <div class="form-group">
 	                    <label>Precio : </label>
-						<input type="number" step="1" th:field="*{precio}" class="form-control" th:errorclass="'form-control alert-danger'" th:value="${#numbers.formatInteger(precioVino.precio, 0)}"/>
+						<input type="number" step="0.01" th:field="*{precio}" class="form-control" th:errorclass="'form-control alert-danger'"/>
 	                    <small class="form-text text-danger" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></small> 
 	                 </div>
 	                 
@@ -91,7 +91,7 @@
                 let vinoId = $(this).data("id");
                 let vinoNombre = $(this).data("nombre");
 
-                $("#vino").val(vinoId);
+                $("#vinoId").val(vinoId);
                 $("#buscar_vino").val(vinoNombre);
                 $("#resultados_busqueda_vino").empty(); // Clear search results
             });

@@ -43,6 +43,7 @@
                                       <div style="display:none;">
                                          <select id="listaPrecioTemplate" class="form-control lista_precio_item_select">
                                               <option th:each="lista : ${listasPrecio}" th:value="${lista.id}" th:text="${lista.nombre}"></option>
+                                              <option value="-1">Descuento * 6</option>
                                          </select>
                                       </div>
                  
@@ -84,6 +85,7 @@
                                                 th:text="${lista.nombre}" 
                                                 th:selected="${detalle.listaPrecio != null ? (detalle.listaPrecio.id == lista.id) : (venta.listaPrecio != null and venta.listaPrecio.id == lista.id)}">
                                         </option>
+                                        <option value="-1">Descuento * 6</option>
                                     </select>
                                 </td>
 								<td>
