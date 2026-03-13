@@ -16,9 +16,9 @@
 				<ul class="list-group mb-3">
 					<li class="list-group-item"><strong>Fecha:</strong> <span th:text="${venta.fecha}"></span></li>
 					<li class="list-group-item"><strong>Cliente:</strong> <span th:text="${venta.cliente.nombre + ' ' + (venta.cliente.apellido != null ? venta.cliente.apellido : '')}"></span></li>
+					<li class="list-group-item"><strong>Dirección:</strong> <span th:text="${venta.cliente.direccion}"></span></li>
 					<li class="list-group-item"><strong>Total:</strong> <span th:text="${#numbers.formatCurrency(venta.total)}"></span></li>
 					<li class="list-group-item"><strong>Pagado:</strong> <span th:text="${#numbers.formatCurrency(venta.pagado)}"></span></li>
-					<li class="list-group-item"><strong>Observaciones:</strong> <span th:text="${venta.observaciones}"></span></li>
 				</ul>
 								
 				<table class="table table-striped">

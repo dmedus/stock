@@ -51,8 +51,8 @@
 								th:href="@{/clientesForm/} + ${cliente.id}">Editar</a></td>
 							<td><a
 								class="btn btn-danger btn-sm"
-								th:href="@{/eliminar/} + ${cliente.id}"
-								onclick="return confirm('¿Estás seguro de eliminar el Cliente: ?');">Eliminar</a></td>
+								th:href="@{/eliminarClientes/} + ${cliente.id}"
+								th:onclick="'return confirm(\'¿Estás seguro de eliminar el Cliente: ' + ${cliente.nombre} + ' ' + ${cliente.apellido} + '?\');'">Eliminar</a></td>
 						</tr>
 					</tbody>
 				</table>

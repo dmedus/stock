@@ -97,10 +97,14 @@ public class ClientesControlador {
 	}
 	
 	@GetMapping("/eliminarClientes/{id}")
-	public String eliminarClientes(@PathVariable(value = "id") Long id,RedirectAttributes flash) {
-		if(id > 0) {
-			clientesServices.delete(id);
-			flash.addFlashAttribute("success", "Cliente eliminado con exito");
+	public String eliminarClientes(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
+		if (id > 0) {
+			try {
+				clientesServices.delete(id);
+				flash.addFlashAttribute("success", "Cliente eliminado con éxito");
+			} catch (Exception e) {
+				flash.addFlashAttribute("error", "No se puede eliminar el cliente porque tiene registros asociados (ventas, pedidos, etc.). Considere desactivarlo en lugar de eliminarlo.");
+			}
 		}
 		return "redirect:/listarClientes";
 	}
