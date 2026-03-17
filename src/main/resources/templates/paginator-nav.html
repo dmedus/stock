@@ -8,9 +8,9 @@
             <span class="page-link" th:if="${page.first}">Primera</span>
             <a class="page-link" th:if="${not page.first}" th:href="@{${page.url}(page=0)}">Primera</a>
         </li>
-        <li class="page-item" th:class="${not page.hasPrevius? 'page-item disabled': 'page-item'}">
-            <span class="page-link" th:if="${not page.hasPrevius}">&laquo;</span>
-            <a class="page-link" th:if="${page.hasPrevius}" th:href="@{${page.url}(page=${page.paginaActual - 2})}">&laquo;</a>
+        <li class="page-item" th:class="${not page.hasPrevious? 'page-item disabled': 'page-item'}">
+            <span class="page-link" th:if="${not page.hasPrevious}">&laquo;</span>
+            <a class="page-link" th:if="${page.hasPrevious}" th:href="@{${page.url}(page=${page.paginaActual - 2})}">&laquo;</a>
         </li>
         <li class="page-item" th:each="item : ${page.paginas}" th:class="${item.actual? 'page-item active': 'page-item'}">
             <span class="page-link" th:if="${item.actual}" th:text="${item.numero}"></span>

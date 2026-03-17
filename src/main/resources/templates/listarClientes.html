@@ -7,6 +7,7 @@
 <body>
 
 	<header th:replace="layout/layout :: header"></header>
+	<div th:replace="layout/layout :: alerts"></div>
 
 	<div class="py-4 container-fluid">
 		<div class="card bg-light">
@@ -52,7 +53,11 @@
 							<td><a
 								class="btn btn-danger btn-sm"
 								th:href="@{/eliminarClientes/} + ${cliente.id}"
-								th:onclick="'return confirm(\'¿Estás seguro de eliminar el Cliente: ' + ${cliente.nombre} + ' ' + ${cliente.apellido} + '?\');'">Eliminar</a></td>
+								th:data-nombre="${cliente.nombre + ' ' + (cliente.apellido != null ? cliente.apellido : '')}"
+								onclick="return confirm('¿Estás seguro de eliminar el Cliente: ' + this.getAttribute('data-nombre') + '?');">Eliminar</a></td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(listarClientes)}">
+							<td colspan="8" class="text-center">No hay clientes registrados en la base de datos.</td>
 						</tr>
 					</tbody>
 				</table>
