@@ -122,6 +122,18 @@ public class Pedido {
     public void setDeposito(Deposito deposito) {
         this.deposito = deposito;
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Pedido)) return false;
+        Pedido other = (Pedido) o;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
     

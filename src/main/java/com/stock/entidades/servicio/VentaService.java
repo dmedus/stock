@@ -25,4 +25,6 @@ public interface VentaService {
     public BigDecimal sumTotalVentas();
 
     public List<Venta> findTop5ByOrderByFechaDesc();
+
+    public void entregarVenta(Long ventaId);
 }

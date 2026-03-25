@@ -1,5 +1,6 @@
 package com.stock.entidades.servicio;
 
+import com.stock.entidades.Combo;
 import com.stock.entidades.Venta;
 import com.stock.entidades.VentaDetalle;
 import com.stock.entidades.Vino;
@@ -21,6 +22,9 @@ public class VentaServiceImpl implements VentaService {
 
     @Autowired
     private VinoRepository vinoRepository;
+
+    @Autowired
+    private StockService stockService;
 
     @Override
     @Transactional(readOnly = true)
@@ -67,12 +71,46 @@ public class VentaServiceImpl implements VentaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal sumTotalVentas() {
-        return ventaRepository.sumTotalVentas();
+        BigDecimal result = ventaRepository.sumTotalVentas();
+        return result != null ? result : BigDecimal.ZERO;
     }
 
     @Override
     public List<Venta> findTop5ByOrderByFechaDesc() {
         return ventaRepository.findTop5ByOrderByFechaDesc();
+    }
+
+    @Override
+    @Transactional
+    public void entregarVenta(Long ventaId) {
+        Venta venta = ventaRepository.findById(ventaId)
+                .orElseThrow(() -> new RuntimeException("La venta no existe en la base de datos"));
+
+        if (venta.getEntregado()) {
+            throw new RuntimeException("La venta ya ha sido entregada");
+        }
+
+        for (VentaDetalle detalle : venta.getDetalles()) {
+            if (detalle.getVino() != null) {
+                int cantidadADescontar = detalle.getCantidad();
+                if (detalle.getListaPrecio() != null) {
+                    String nombreLista = detalle.getListaPrecio().getNombre().toLowerCase();
+                    if (nombreLista.contains("caja") || nombreLista.contains("mayorista") || nombreLista.contains("bulto")) {
+                        cantidadADescontar = detalle.getCantidad() * detalle.getVino().getCantVinosxcaja();
+                    }
+                }
+                stockService.discountStock(detalle.getVino(), cantidadADescontar);
+            } else if (detalle.getCombo() != null) {
+                Combo combo = detalle.getCombo();
+                for (Vino v : combo.getVinos()) {
+                    stockService.discountStock(v, detalle.getCantidad());
+                }
+            }
+        }
+
+        venta.setEntregado(true);
+        ventaRepository.save(venta);
     }
 }

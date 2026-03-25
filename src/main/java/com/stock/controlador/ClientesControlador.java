@@ -96,7 +96,7 @@ public class ClientesControlador {
 		return "clientesForm";
 	}
 	
-	@GetMapping("/eliminarClientes/{id}")
+	@PostMapping("/eliminarClientes/{id}")
 	public String eliminarClientes(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		if (id > 0) {
 			try {

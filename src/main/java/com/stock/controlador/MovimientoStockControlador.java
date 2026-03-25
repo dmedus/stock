@@ -1,7 +1,6 @@
 package com.stock.controlador;
 
 import com.stock.entidades.Deposito;
-import com.stock.entidades.Stock;
 import com.stock.entidades.Vino;
 import com.stock.entidades.servicio.DepositoService;
 import com.stock.entidades.servicio.StockService;
@@ -58,28 +57,12 @@ public class MovimientoStockControlador {
             return "redirect:/movimientoStock";
         }
 
-        Stock stockOrigen = stockService.findByVinoAndDeposito(vino, depositoOrigen);
-
-        if (stockOrigen == null || stockOrigen.getCantidad() < cantidad) {
-            flash.addFlashAttribute("error", "No hay suficiente stock en el depósito de origen.");
-            return "redirect:/movimientoStock";
+        try {
+            stockService.moverStock(vino, depositoOrigen, depositoDestino, cantidad);
+            flash.addFlashAttribute("success", "Movimiento de stock realizado con éxito.");
+        } catch (RuntimeException e) {
+            flash.addFlashAttribute("error", e.getMessage());
         }
-
-        stockOrigen.setCantidad(stockOrigen.getCantidad() - cantidad);
-        stockService.save(stockOrigen);
-
-        Stock stockDestino = stockService.findByVinoAndDeposito(vino, depositoDestino);
-        if (stockDestino == null) {
-            stockDestino = new Stock();
-            stockDestino.setVino(vino);
-            stockDestino.setDeposito(depositoDestino);
-            stockDestino.setCantidad(cantidad);
-        } else {
-            stockDestino.setCantidad(stockDestino.getCantidad() + cantidad);
-        }
-        stockService.save(stockDestino);
-
-        flash.addFlashAttribute("success", "Movimiento de stock realizado con éxito.");
         return "redirect:/movimientoStock";
     }
 }

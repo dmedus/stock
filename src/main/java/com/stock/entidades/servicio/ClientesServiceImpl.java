@@ -21,6 +21,7 @@ public class ClientesServiceImpl implements ClientesService{
 	
 	
 	@Override
+	@Transactional
 	public Clientes guardar(Clientes clienteDTO) {
 	    return repository.save(clienteDTO);
 	}

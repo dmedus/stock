@@ -454,7 +454,7 @@ public class VentaControlador {
         return "verVentaDetalles";
     }
 
-    @GetMapping("/eliminarVenta/{id}")
+    @PostMapping("/eliminarVenta/{id}")
     public String eliminarVenta(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
         if (id > 0) {
             ventaService.deleteById(id);
@@ -484,48 +484,12 @@ public class VentaControlador {
 
     @PostMapping("/entregarVenta")
     public String entregarVenta(@RequestParam Long ventaId, RedirectAttributes flash) {
-        Venta venta = ventaService.findById(ventaId);
-        if (venta == null) {
-            flash.addFlashAttribute("error", "La venta no existe en la base de datos");
-            return "redirect:/listarVentas";
-        }
-
-        if (venta.getEntregado()) {
-            flash.addFlashAttribute("warning", "La venta ya ha sido entregada");
-            return "redirect:/listarVentas";
-        }
-
         try {
-            for (VentaDetalle detalle : venta.getDetalles()) {
-                if (detalle.getVino() != null) {
-                    int cantidadADescontar = detalle.getCantidad();
-                    
-                    // Verificar si la venta fue por caja basándose en el nombre de la lista de precios
-                    if (detalle.getListaPrecio() != null) {
-                        String nombreLista = detalle.getListaPrecio().getNombre().toLowerCase();
-                        if (nombreLista.contains("caja") || nombreLista.contains("mayorista") || nombreLista.contains("bulto")) {
-                            cantidadADescontar = detalle.getCantidad() * detalle.getVino().getCantVinosxcaja();
-                        }
-                    }
-                    
-                    stockService.discountStock(detalle.getVino(), cantidadADescontar);
-                } else if (detalle.getCombo() != null) {
-                    Combo combo = detalle.getCombo();
-                    Integer cantidadCombos = detalle.getCantidad();
-                    // Iterate wines in the combo and discount based on combo quantity
-                    for (Vino v : combo.getVinos()) {
-                        stockService.discountStock(v, cantidadCombos);
-                    }
-                }
-            }
-
-            venta.setEntregado(true);
-            ventaService.save(venta);
+            ventaService.entregarVenta(ventaId);
             flash.addFlashAttribute("success", "Venta marcada como entregada. Stock actualizado.");
         } catch (RuntimeException e) {
             flash.addFlashAttribute("error", e.getMessage());
         }
-
         return "redirect:/listarVentas";
     }
 }

@@ -145,4 +145,17 @@ public class Venta {
     public void setDetalles(List<VentaDetalle> detalles) {
         this.detalles = detalles;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Venta)) return false;
+        Venta other = (Venta) o;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

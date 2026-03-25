@@ -1,6 +1,6 @@
 package com.stock.entidades;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,14 +25,14 @@ public class Clientes {
     private String ciudad;
     private String provincia;
     private String pais;
-    private Date fechaAlta;
+    private LocalDate fechaAlta;
     @Column(nullable = false)
     private Boolean activo = true;
 
     
     
 	public Clientes(Long id, String nombre, String apellido, String email, String telefono, String direccion,
-			String ciudad, String provincia, String pais, Date fechaAlta, Boolean activo) {
+			String ciudad, String provincia, String pais, LocalDate fechaAlta, Boolean activo) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
@@ -105,10 +105,10 @@ public class Clientes {
 	public void setPais(String pais) {
 		this.pais = pais;
 	}
-	public Date getFechaAlta() {
+	public LocalDate getFechaAlta() {
 		return fechaAlta;
 	}
-	public void setFechaAlta(Date fechaAlta) {
+	public void setFechaAlta(LocalDate fechaAlta) {
 		this.fechaAlta = fechaAlta;
 	}
 

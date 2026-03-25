@@ -140,7 +140,7 @@ public class PedidoControlador {
         return "redirect:/listarPedidos";
     }
 
-    @GetMapping("/confirmarPedido/{id}")
+    @PostMapping("/confirmarPedido/{id}")
     public String confirmarPedido(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
         try {
             pedidoService.confirmarPedido(id);
@@ -164,7 +164,7 @@ public class PedidoControlador {
         return "verPedidoDetalles";
     }
 
-    @GetMapping("/pagarPedido/{id}")
+    @PostMapping("/pagarPedido/{id}")
     public String pagarPedido(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
         Pedido pedido = pedidoService.findById(id);
         if (pedido == null) {

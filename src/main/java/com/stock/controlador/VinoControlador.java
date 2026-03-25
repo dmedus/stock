@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +58,7 @@ public class VinoControlador {
     }
 
     @PostMapping("/vinoForm")
-    public String guardarVino(@ModelAttribute("vino") Vino vino, BindingResult result, Model model, RedirectAttributes flash, SessionStatus status) {
+    public String guardarVino(@Valid @ModelAttribute("vino") Vino vino, BindingResult result, Model model, RedirectAttributes flash, SessionStatus status) {
         if (result.hasErrors()) {
             List<Bodega> bodegas = bodegaService.findAll();
             List<Variedad> variedades = variedadService.findAll();
@@ -93,7 +95,7 @@ public class VinoControlador {
         return "vinoForm";
     }
 
-    @GetMapping("/eliminarVino/{id}")
+    @PostMapping("/eliminarVino/{id}")
     public String eliminarVino(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
         if (id > 0) {
             vinoService.deleteById(id);

@@ -49,15 +49,19 @@
 								class="btn btn-danger btn-sm"
 								th:href="@{/eliminarPedido/} + ${pedido.id}"
 								onclick="return confirm('¿Estás seguro de eliminar el Pedido: ?');">Eliminar</a></td>
-							<td th:if="${pedido.activo}"><a
-								class="btn btn-success btn-sm"
-								th:href="@{/confirmarPedido/} + ${pedido.id}"
-								onclick="return confirm('¿Estás seguro de confirmar el Pedido: ?');">Confirmar</a></td>
+							<td th:if="${pedido.activo}">
+								<form th:action="@{/confirmarPedido/} + ${pedido.id}" method="post" style="display:inline;"
+									onsubmit="return confirm('¿Estás seguro de confirmar el Pedido?');">
+									<button type="submit" class="btn btn-success btn-sm">Confirmar</button>
+								</form>
+							</td>
 							<td th:unless="${pedido.activo}"><a href="#" class="btn btn-success btn-sm disabled">Confirmar</a></td>
-							<td th:if="${pedido.pagado.compareTo(pedido.total) < 0}"><a
-								class="btn btn-primary btn-sm"
-								th:href="@{/pagarPedido/} + ${pedido.id}"
-								onclick="return confirm('¿Estás seguro de marcar el Pedido como pagado?');">Pagar</a></td>
+							<td th:if="${pedido.pagado.compareTo(pedido.total) < 0}">
+								<form th:action="@{/pagarPedido/} + ${pedido.id}" method="post" style="display:inline;"
+									onsubmit="return confirm('¿Estás seguro de marcar el Pedido como pagado?');">
+									<button type="submit" class="btn btn-primary btn-sm">Pagar</button>
+								</form>
+							</td>
 							<td th:unless="${pedido.pagado.compareTo(pedido.total) < 0}"><a href="#" class="btn btn-primary btn-sm disabled">Pagar</a></td>
 							<td><a
 								class="btn btn-info btn-sm"

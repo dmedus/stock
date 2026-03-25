@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
@@ -28,7 +29,8 @@ public class VinoServiceImpl implements VinoService {
     @Transactional(readOnly = true)
     public List<Vino> findAll() {
         List<Vino> vinos = vinoRepository.findAll();
-        vinos.forEach(vino -> vino.setStockActual(stockService.getStockTotal(vino)));
+        Map<Long, Integer> stockMap = stockService.getStockTotalMap();
+        vinos.forEach(vino -> vino.setStockActual(stockMap.getOrDefault(vino.getId(), 0)));
         return vinos;
     }
 
@@ -83,7 +85,8 @@ public class VinoServiceImpl implements VinoService {
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         String accentFreeTerm = pattern.matcher(normalizedTerm).replaceAll("");
         List<Vino> vinos = vinoRepository.findByNombreContainingIgnoreCase(accentFreeTerm);
-        vinos.forEach(vino -> vino.setStockActual(stockService.getStockTotal(vino)));
+        Map<Long, Integer> stockMap = stockService.getStockTotalMap();
+        vinos.forEach(vino -> vino.setStockActual(stockMap.getOrDefault(vino.getId(), 0)));
         return vinos;
     }
 
@@ -95,7 +98,8 @@ public class VinoServiceImpl implements VinoService {
     @Override
     public List<Vino> findTop5ByOrderByStockActualAsc() {
         List<Vino> vinos = vinoRepository.findTop5ByOrderByStockActualAsc();
-        vinos.forEach(vino -> vino.setStockActual(stockService.getStockTotal(vino)));
+        Map<Long, Integer> stockMap = stockService.getStockTotalMap();
+        vinos.forEach(vino -> vino.setStockActual(stockMap.getOrDefault(vino.getId(), 0)));
         return vinos;
     }
 

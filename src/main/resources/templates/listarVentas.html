@@ -85,10 +85,12 @@
 							<td><a
 								class="btn btn-warning btn-sm"
 								th:href="@{/ventaForm/} + ${venta.id}">Editar</a></td>
-							<td><a
-								class="btn btn-danger btn-sm"
-								th:href="@{/eliminarVenta/} + ${venta.id}"
-								onclick="return confirm('¿Estás seguro de eliminar la Venta: ?');">Eliminar</a></td>
+							<td>
+								<form th:action="@{/eliminarVenta/} + ${venta.id}" method="post" style="display:inline;"
+									onsubmit="return confirm('¿Estás seguro de eliminar la Venta?');">
+									<button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+								</form>
+							</td>
                             <td>
                                 <form th:action="@{/entregarVenta}" method="post" style="display:inline;">
                                     <input type="hidden" name="ventaId" th:value="${venta.id}"/>

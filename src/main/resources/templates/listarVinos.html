@@ -46,10 +46,12 @@
 							<td><a
 								class="btn btn-warning btn-sm"
 								th:href="@{/vinoForm/} + ${vino.id}">Editar</a></td>
-							<td><a
-								class="btn btn-danger btn-sm"
-								th:href="@{/eliminarVino/} + ${vino.id}"
-								onclick="return confirm('¿Estás seguro de eliminar el Vino: ?');">Eliminar</a></td>
+							<td>
+								<form th:action="@{/eliminarVino/} + ${vino.id}" method="post" style="display:inline;"
+									onsubmit="return confirm('¿Estás seguro de eliminar el Vino?');">
+									<button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+								</form>
+							</td>
 						</tr>
 					</tbody>
 				</table>

@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StockServiceImpl implements StockService {
@@ -42,18 +44,49 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Integer> getStockTotalMap() {
+        Map<Long, Integer> map = new HashMap<>();
+        for (Object[] row : stockRepository.findStockTotalPorVino()) {
+            Long vinoId = (Long) row[0];
+            Integer total = ((Number) row[1]).intValue();
+            map.put(vinoId, total);
+        }
+        return map;
+    }
+
+    @Override
+    @Transactional
+    public void moverStock(Vino vino, Deposito origen, Deposito destino, Integer cantidad) {
+        Stock stockOrigen = stockRepository.findByVinoAndDeposito(vino, origen);
+        if (stockOrigen == null || stockOrigen.getCantidad() < cantidad) {
+            throw new RuntimeException("No hay suficiente stock en el depósito de origen.");
+        }
+        stockOrigen.setCantidad(stockOrigen.getCantidad() - cantidad);
+        stockRepository.save(stockOrigen);
+
+        Stock stockDestino = stockRepository.findByVinoAndDeposito(vino, destino);
+        if (stockDestino == null) {
+            stockDestino = new Stock();
+            stockDestino.setVino(vino);
+            stockDestino.setDeposito(destino);
+            stockDestino.setCantidad(cantidad);
+        } else {
+            stockDestino.setCantidad(stockDestino.getCantidad() + cantidad);
+        }
+        stockRepository.save(stockDestino);
+    }
+
+    @Override
     @Transactional
     public void discountStock(Vino vino, Integer cantidad) {
-        System.out.println("Intentando descontar stock. Vino: " + vino.getNombre() + ", Cantidad a descontar: " + cantidad);
-        Integer stockTotal = getStockTotal(vino);
-        System.out.println("Stock total actual para " + vino.getNombre() + ": " + stockTotal);
+        List<Stock> stocks = stockRepository.findByVinoForUpdate(vino);
+        Integer stockTotal = stocks.stream().mapToInt(Stock::getCantidad).sum();
 
         if (stockTotal < cantidad) {
-            System.err.println("Error: No hay suficiente stock. Disponible: " + stockTotal + ", Solicitado: " + cantidad);
             throw new RuntimeException("No hay suficiente stock para el vino: " + vino.getNombre());
         }
 
-        List<Stock> stocks = stockRepository.findByVino(vino);
         int cantidadRestante = cantidad;
 
         for (Stock stock : stocks) {
@@ -67,12 +100,10 @@ public class StockServiceImpl implements StockService {
                 stock.setCantidad(stock.getCantidad() - cantidadRestante);
                 cantidadRestante = 0;
                 stockRepository.save(stock);
-                System.out.println("Stock ID " + stock.getId() + " actualizado. Nuevo stock: " + stock.getCantidad());
             } else {
                 cantidadRestante -= stock.getCantidad();
                 stock.setCantidad(0);
                 stockRepository.save(stock);
-                System.out.println("Stock ID " + stock.getId() + " vaciado. Cantidad restante a descontar: " + cantidadRestante);
             }
         }
     }

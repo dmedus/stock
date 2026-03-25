@@ -50,11 +50,12 @@
 							<td><a
 								class="btn btn-warning btn-sm"
 								th:href="@{/clientesForm/} + ${cliente.id}">Editar</a></td>
-							<td><a
-								class="btn btn-danger btn-sm"
-								th:href="@{/eliminarClientes/} + ${cliente.id}"
-								th:data-nombre="${cliente.nombre + ' ' + (cliente.apellido != null ? cliente.apellido : '')}"
-								onclick="return confirm('¿Estás seguro de eliminar el Cliente: ' + this.getAttribute('data-nombre') + '?');">Eliminar</a></td>
+							<td>
+								<form th:action="@{/eliminarClientes/} + ${cliente.id}" method="post" style="display:inline;">
+									<button type="submit" class="btn btn-danger btn-sm"
+										onclick="return confirm('¿Estás seguro de eliminar este cliente?');">Eliminar</button>
+								</form>
+							</td>
 						</tr>
 						<tr th:if="${#lists.isEmpty(listarClientes)}">
 							<td colspan="8" class="text-center">No hay clientes registrados en la base de datos.</td>
