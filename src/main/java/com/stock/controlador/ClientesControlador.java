@@ -1,5 +1,6 @@
 package com.stock.controlador;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +69,11 @@ public class ClientesControlador {
 		}
 		
 		String mensaje = (clientes.getId() != null) ? "El Clientes ha sido editato con exito" : "Clientes registrado con exito";
-		
+
+		if (clientes.getId() == null) {
+			clientes.setFechaAlta(LocalDate.now());
+		}
+
 		clientesServices.guardar(clientes);
 		status.setComplete();
 		flash.addFlashAttribute("success", mensaje);
