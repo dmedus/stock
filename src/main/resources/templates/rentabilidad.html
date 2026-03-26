@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+<meta charset="utf-8">
+</head>
+<body>
+
+<header th:replace="layout/layout :: header"></header>
+
+<div class="container-fluid py-4">
+
+    <h1 class="mb-4" th:text="${titulo}"></h1>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <strong>Ganancia Proyectada Total (stock actual × ganancia por botella):
+                <span th:text="${#numbers.formatCurrency(gananciaTotal)}"></span>
+            </strong>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped table-responsive table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Vino</th>
+                        <th>Lista de Precio</th>
+                        <th>Precio Venta</th>
+                        <th>Costo Compra</th>
+                        <th>Costo Flete</th>
+                        <th>Costo Total</th>
+                        <th>Ganancia / Botella</th>
+                        <th>% Margen</th>
+                        <th>Stock</th>
+                        <th>Ganancia Proyectada</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="fila : ${filas}"
+                        th:classappend="${fila.ganancia != null and fila.ganancia.compareTo(T(java.math.BigDecimal).ZERO) < 0} ? 'table-danger' : ''">
+                        <td th:text="${fila.nombre}"></td>
+                        <td th:text="${fila.listaPrecio}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.precioVenta)}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.costoCompra)}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.costoFlete)}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.costoTotal)}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.ganancia)}"></td>
+                        <td>
+                            <span th:if="${fila.margen != null}" th:text="${fila.margen} + '%'"></span>
+                            <span th:if="${fila.margen == null}" class="text-muted">—</span>
+                        </td>
+                        <td th:text="${fila.stockActual}"></td>
+                        <td th:text="${#numbers.formatCurrency(fila.gananciaProyectada)}"></td>
+                        <td>
+                            <a th:href="@{/vinoForm/} + ${fila.vinoId}" class="btn btn-warning btn-sm">Editar costos</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(filas)}">
+                        <td colspan="11">No hay precios cargados. Agregue precios en la sección Lista de Precios.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

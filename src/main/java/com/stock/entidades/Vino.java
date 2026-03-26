@@ -1,5 +1,6 @@
 package com.stock.entidades;
 
+import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -48,6 +49,12 @@ public class Vino {
 
     @Column(nullable = false)
     private Boolean activo = true;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal costoCompra;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal costoFlete;
 
     @javax.persistence.Transient
     private Integer stockActual;
@@ -140,5 +147,21 @@ public class Vino {
 
     public void setStockActual(Integer stockActual) {
         this.stockActual = stockActual;
+    }
+
+    public BigDecimal getCostoCompra() {
+        return costoCompra;
+    }
+
+    public void setCostoCompra(BigDecimal costoCompra) {
+        this.costoCompra = costoCompra;
+    }
+
+    public BigDecimal getCostoFlete() {
+        return costoFlete;
+    }
+
+    public void setCostoFlete(BigDecimal costoFlete) {
+        this.costoFlete = costoFlete;
     }
 }
