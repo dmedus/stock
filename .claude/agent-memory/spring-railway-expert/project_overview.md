@@ -7,18 +7,31 @@ type: project
 Spring Boot 2.6.4, Java 11, MySQL. App: gestión de stock y ventas de vinos (VendemosVinos).
 Target deployment: Railway con MySQL plugin, perfil de producción separado en application-prod.properties.
 
-## Estado actual de configuración (2026-03-25)
+## Estado actual de configuración (actualizado 2026-03-26)
 
-application.properties (local):
-- Apunta a localhost:3306/db_stock con usuario root/root
-- ddl-auto=update (peligroso en producción)
-- Sin configuración HikariCP
+application.properties (local/default):
+- URL construida con variables de entorno Railway + fallback local: ${MYSQLHOST:localhost}:${MYSQLPORT:3306}/${MYSQLDATABASE:db_stock}
+- ddl-auto=update (riesgo en producción si no se activa perfil prod)
+- HikariCP configurado: pool-size=5, min-idle=2, connection-timeout=30000, idle-timeout=600000, max-lifetime=1800000, keepalive-time=60000, connection-test-query=SELECT 1
+- socketTimeout=60000 y connectTimeout=30000 en la URL JDBC
+- Nombres de variables CORRECTOS: MYSQLHOST, MYSQLPORT, MYSQLDATABASE, MYSQLUSER, MYSQLPASSWORD (coinciden con lo que Railway inyecta)
 
 application-prod.properties (Railway):
-- Usa variables de entorno ${MYSQLHOST}, ${MYSQLPORT}, ${MYSQLDATABASE}, ${MYSQLUSER}, ${MYSQLPASSWORD}
+- Variables sin fallback (correcto para producción)
 - ddl-auto=validate (correcto para producción)
-- HikariCP configurado: pool-size=5, min-idle=2, connection-timeout=30000, idle-timeout=600000, max-lifetime=1800000, keepalive-time=60000, connection-test-query=SELECT 1
-- Falta: socketTimeout explícito en la URL JDBC y leakDetectionThreshold
+- HikariCP idéntico + leak-detection-threshold=60000
+- socketTimeout en URL JDBC: AUSENTE (riesgo de hilos colgados)
+
+railway.toml:
+- Builder: Nixpacks
+- buildCommand: mvn clean package -DskipTests
+- startCommand: java -Djava.net.preferIPv6Addresses=true -Djava.net.preferIPv4Stack=false -jar target/stock-ventas-1.0.jar
+- CRÍTICO: No activa --spring.profiles.active=prod → usa application.properties con ddl-auto=update en producción
+- Las flags IPv6 fueron añadidas como intento de corregir el crash (commit c342f1d)
+
+Driver MySQL:
+- Artefacto: mysql-connector-java sin versión explícita → hereda de Spring Boot 2.6.4 BOM → versión 8.0.28
+- GroupId: mysql (antiguo) en lugar de com.mysql (nuevo). Funcional pero desactualizado.
 
 ## Hallazgos de arquitectura críticos identificados (2026-03-25)
 
@@ -44,5 +57,5 @@ application-prod.properties (Railway):
 
 10. MovimientoStockControlador: el movimiento de stock entre depósitos (discount origen + increment destino) no está envuelto en @Transactional a nivel de servicio.
 
-**Why:** Auditoría exhaustiva realizada 2026-03-25.
+**Why:** Auditoría exhaustiva realizada 2026-03-25 / 2026-03-26.
 **How to apply:** Priorizar corrección de race condition en entrega de ventas y N+1 en listado de vinos antes del deploy a Railway.
