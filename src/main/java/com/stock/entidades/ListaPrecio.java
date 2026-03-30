@@ -27,6 +27,9 @@ public class ListaPrecio {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Column(nullable = false)
+    private Boolean esPorCaja = false;
+
 	public Long getId() {
 		return id;
 	}
@@ -50,6 +53,14 @@ public class ListaPrecio {
 	public void setActivo(Boolean activo) {
 		this.activo = activo;
 	}
-    
-    
+
+	public Boolean getEsPorCaja() {
+		return esPorCaja;
+	}
+
+	public void setEsPorCaja(Boolean esPorCaja) {
+		this.esPorCaja = esPorCaja;
+	}
+
+
 }

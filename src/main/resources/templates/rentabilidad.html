@@ -13,7 +13,7 @@
 
     <div class="card mb-4">
         <div class="card-header bg-dark text-white">
-            <strong>Ganancia Proyectada Total (stock actual × ganancia por botella):
+            <strong>Ganancia Proyectada Total:
                 <span th:text="${#numbers.formatCurrency(gananciaTotal)}"></span>
             </strong>
         </div>
@@ -30,9 +30,9 @@
                         <th>Costo Compra</th>
                         <th>Costo Flete</th>
                         <th>Costo Total</th>
-                        <th>Ganancia / Botella</th>
+                        <th>Ganancia / Unidad</th>
                         <th>% Margen</th>
-                        <th>Stock</th>
+                        <th>Stock (botellas)</th>
                         <th>Ganancia Proyectada</th>
                         <th></th>
                     </tr>
@@ -41,7 +41,10 @@
                     <tr th:each="fila : ${filas}"
                         th:classappend="${fila.ganancia != null and fila.ganancia.compareTo(T(java.math.BigDecimal).ZERO) < 0} ? 'table-danger' : ''">
                         <td th:text="${fila.nombre}"></td>
-                        <td th:text="${fila.listaPrecio}"></td>
+                        <td>
+                            <span th:text="${fila.listaPrecio}"></span>
+                            <span th:if="${fila.esPorCaja}" class="badge badge-info ml-1">x caja</span>
+                        </td>
                         <td th:text="${#numbers.formatCurrency(fila.precioVenta)}"></td>
                         <td th:text="${#numbers.formatCurrency(fila.costoCompra)}"></td>
                         <td th:text="${#numbers.formatCurrency(fila.costoFlete)}"></td>

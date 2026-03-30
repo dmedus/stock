@@ -54,10 +54,25 @@ public class RentabilidadServiceImpl implements RentabilidadService {
         dto.setListaPrecio(pv.getListaPrecio().getNombre());
         dto.setPrecioVenta(pv.getPrecio());
 
-        BigDecimal costoCompra = pv.getVino().getCostoCompra() != null ? pv.getVino().getCostoCompra() : BigDecimal.ZERO;
-        BigDecimal costoFlete  = pv.getVino().getCostoFlete()  != null ? pv.getVino().getCostoFlete()  : BigDecimal.ZERO;
-        BigDecimal costoTotal  = costoCompra.add(costoFlete);
+        BigDecimal costoCompraBotella = pv.getVino().getCostoCompra() != null ? pv.getVino().getCostoCompra() : BigDecimal.ZERO;
+        BigDecimal costoFleteBotella  = pv.getVino().getCostoFlete()  != null ? pv.getVino().getCostoFlete()  : BigDecimal.ZERO;
 
+        boolean esPorCaja = Boolean.TRUE.equals(pv.getListaPrecio().getEsPorCaja());
+        dto.setEsPorCaja(esPorCaja);
+
+        BigDecimal costoCompra;
+        BigDecimal costoFlete;
+        if (esPorCaja) {
+            int cantPorCaja = pv.getVino().getCantVinosxcaja() != null ? pv.getVino().getCantVinosxcaja() : 1;
+            BigDecimal multiplicador = new BigDecimal(cantPorCaja);
+            costoCompra = costoCompraBotella.multiply(multiplicador);
+            costoFlete  = costoFleteBotella.multiply(multiplicador);
+        } else {
+            costoCompra = costoCompraBotella;
+            costoFlete  = costoFleteBotella;
+        }
+
+        BigDecimal costoTotal = costoCompra.add(costoFlete);
         dto.setCostoCompra(costoCompra);
         dto.setCostoFlete(costoFlete);
         dto.setCostoTotal(costoTotal);
@@ -75,7 +90,16 @@ public class RentabilidadServiceImpl implements RentabilidadService {
 
         Integer stock = stockMap.getOrDefault(pv.getVino().getId(), 0);
         dto.setStockActual(stock);
-        dto.setGananciaProyectada(ganancia.multiply(new BigDecimal(stock)));
+        // gananciaProyectada: si es por caja, la ganancia es por caja y el stock está en botellas
+        BigDecimal gananciaProyectada;
+        if (esPorCaja) {
+            int cantPorCaja = pv.getVino().getCantVinosxcaja() != null ? pv.getVino().getCantVinosxcaja() : 1;
+            BigDecimal cajas = new BigDecimal(stock).divide(new BigDecimal(cantPorCaja), 0, RoundingMode.DOWN);
+            gananciaProyectada = ganancia.multiply(cajas);
+        } else {
+            gananciaProyectada = ganancia.multiply(new BigDecimal(stock));
+        }
+        dto.setGananciaProyectada(gananciaProyectada);
 
         return dto;
     }

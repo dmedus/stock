@@ -7,6 +7,7 @@ public class RentabilidadVinoDTO {
     private Long vinoId;
     private String nombre;
     private String listaPrecio;
+    private boolean esPorCaja;
     private BigDecimal precioVenta;
     private BigDecimal costoCompra;
     private BigDecimal costoFlete;
@@ -24,6 +25,9 @@ public class RentabilidadVinoDTO {
 
     public String getListaPrecio() { return listaPrecio; }
     public void setListaPrecio(String listaPrecio) { this.listaPrecio = listaPrecio; }
+
+    public boolean isEsPorCaja() { return esPorCaja; }
+    public void setEsPorCaja(boolean esPorCaja) { this.esPorCaja = esPorCaja; }
 
     public BigDecimal getPrecioVenta() { return precioVenta; }
     public void setPrecioVenta(BigDecimal precioVenta) { this.precioVenta = precioVenta; }

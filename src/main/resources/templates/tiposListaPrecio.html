@@ -22,6 +22,7 @@
 							<th>ID</th>
 							<th>Nombre</th>
 							<th>Activo</th>
+							<th>Por Caja</th>
 							<th>Editar</th>
 							<th>Eliminar</th>
 						</tr>
@@ -31,6 +32,7 @@
 							<td th:text="${listaPrecio.id}"></td>
 							<td th:text="${listaPrecio.nombre}"></td>
 							<td th:text="${listaPrecio.activo}"></td>
+							<td th:text="${listaPrecio.esPorCaja}"></td>
 							<td><a
 								class="btn btn-warning btn-sm"
 								th:href="@{/listaPrecioForm/} + ${listaPrecio.id}">Editar</a></td>
