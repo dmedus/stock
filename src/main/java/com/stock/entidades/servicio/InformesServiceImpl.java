@@ -96,9 +96,18 @@ public class InformesServiceImpl implements InformesService {
                 ? totalIngresos.divide(BigDecimal.valueOf(cantidadVentas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO);
 
-        // ---- Detalles solo de ventas realizadas (entregadas y pagadas) ----
-        List<VentaDetalle> detallesVino = ventas.stream()
+        // ---- Ventas realizadas (entregadas y pagadas) ----
+        List<Venta> ventasRealizadas = ventas.stream()
                 .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
+                .collect(Collectors.toList());
+
+        // Ingreso = suma de venta.total de ventas realizadas (siempre cargado)
+        BigDecimal ingresoRealizadas = ventasRealizadas.stream()
+                .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Detalles de vinos de ventas realizadas
+        List<VentaDetalle> detallesVino = ventasRealizadas.stream()
                 .flatMap(v -> v.getDetalles().stream())
                 .filter(d -> d.getVino() != null)
                 .collect(Collectors.toList());
@@ -118,18 +127,14 @@ public class InformesServiceImpl implements InformesService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal subtotalVinos = detallesVino.stream()
-                .map(d -> d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal gananciaBruta = subtotalVinos.subtract(costoTotal);
-        dto.setSubtotalVinos(subtotalVinos);
+        BigDecimal gananciaBruta = ingresoRealizadas.subtract(costoTotal);
+        dto.setSubtotalVinos(ingresoRealizadas);
         dto.setCostoTotal(costoTotal);
         dto.setGananciaBruta(gananciaBruta);
 
-        if (costoTotal.compareTo(BigDecimal.ZERO) > 0) {
+        if (ingresoRealizadas.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal margen = gananciaBruta
-                    .divide(costoTotal, 4, RoundingMode.HALF_UP)
+                    .divide(ingresoRealizadas, 4, RoundingMode.HALF_UP)
                     .multiply(new BigDecimal("100"))
                     .setScale(1, RoundingMode.HALF_UP);
             dto.setMargenBruto(margen);
@@ -172,10 +177,6 @@ public class InformesServiceImpl implements InformesService {
         dto.setTopVinos(topVinos);
 
         // ---- Resumen por usuario (ventas realizadas) ----
-        List<Venta> ventasRealizadas = ventas.stream()
-                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
-                .collect(Collectors.toList());
-
         Map<String, List<Venta>> porUsuario = ventasRealizadas.stream()
                 .filter(v -> v.getUsuario() != null)
                 .collect(Collectors.groupingBy(v -> v.getUsuario().getUsuario()));
