@@ -127,6 +127,28 @@ public class InformesServiceImpl implements InformesService {
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // DEBUG TEMPORAL
+        System.out.println("=== DEBUG INFORME " + mes + "/" + anio + " ===");
+        System.out.println("ventasRealizadas: " + ventasRealizadas.size());
+        System.out.println("ingresoRealizadas: " + ingresoRealizadas);
+        System.out.println("detallesVino: " + detallesVino.size());
+        for (VentaDetalle d : detallesVino) {
+            int bots = resolverBotellas(d);
+            BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
+            BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
+            System.out.println("  Vino=" + d.getVino().getNombre()
+                + " | cant=" + d.getCantidad()
+                + " | botellas(resuelto)=" + bots
+                + " | costoCompra=" + cc
+                + " | costoFlete=" + cf
+                + " | costoLinea=" + cc.add(cf).multiply(BigDecimal.valueOf(bots))
+                + " | subtotal=" + d.getSubtotal()
+                + " | lista=" + (d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "null")
+                + " | esPorCaja=" + (d.getListaPrecio() != null ? d.getListaPrecio().getEsPorCaja() : "null"));
+        }
+        System.out.println("costoTotal: " + costoTotal);
+        System.out.println("=== FIN DEBUG ===");
+
         BigDecimal gananciaBruta = ingresoRealizadas.subtract(costoTotal);
         dto.setSubtotalVinos(ingresoRealizadas);
         dto.setCostoTotal(costoTotal);
