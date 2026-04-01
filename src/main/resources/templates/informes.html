@@ -151,8 +151,8 @@
                     <!-- Fila: Ingresos - Costo -->
                     <div class="row text-center">
                         <div class="col-md-4">
-                            <p class="text-muted mb-1">Ingresos (botellas)</p>
-                            <h4 th:text="${#numbers.formatCurrency(informe.totalIngresos)}"></h4>
+                            <p class="text-muted mb-1">Ingresos por vinos (ventas realizadas)</p>
+                            <h4 th:text="${#numbers.formatCurrency(informe.subtotalVinos)}"></h4>
                         </div>
                         <div class="col-md-2 align-self-center text-muted font-weight-bold" style="font-size:1.5rem;">−</div>
                         <div class="col-md-4">
@@ -181,7 +181,8 @@
                     <div class="row text-center align-items-center">
                         <div class="col-md-4">
                             <p class="text-muted mb-1">Ganancia bruta</p>
-                            <h5 th:text="${#numbers.formatCurrency(informe.gananciaBruta)}"></h5>
+                            <h5 th:classappend="${informe.gananciaBruta.signum() >= 0} ? 'text-success' : 'text-danger'"
+                                th:text="${#numbers.formatCurrency(informe.gananciaBruta)}"></h5>
                         </div>
                         <div class="col-md-2 text-muted font-weight-bold" style="font-size:1.5rem;">−</div>
                         <div class="col-md-4">

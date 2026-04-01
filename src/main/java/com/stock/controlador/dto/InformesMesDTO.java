@@ -26,6 +26,7 @@ public class InformesMesDTO {
     private Long ventasPendientesEntrega;
 
     // Rentabilidad
+    private BigDecimal subtotalVinos;
     private BigDecimal costoTotal;
     private BigDecimal gananciaBruta;
     private BigDecimal margenBruto;
@@ -84,6 +85,9 @@ public class InformesMesDTO {
 
     public Long getVentasPendientesEntrega() { return ventasPendientesEntrega; }
     public void setVentasPendientesEntrega(Long ventasPendientesEntrega) { this.ventasPendientesEntrega = ventasPendientesEntrega; }
+
+    public BigDecimal getSubtotalVinos() { return subtotalVinos; }
+    public void setSubtotalVinos(BigDecimal subtotalVinos) { this.subtotalVinos = subtotalVinos; }
 
     public BigDecimal getCostoTotal() { return costoTotal; }
     public void setCostoTotal(BigDecimal costoTotal) { this.costoTotal = costoTotal; }

@@ -123,6 +123,7 @@ public class InformesServiceImpl implements InformesService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gananciaBruta = subtotalVinos.subtract(costoTotal);
+        dto.setSubtotalVinos(subtotalVinos);
         dto.setCostoTotal(costoTotal);
         dto.setGananciaBruta(gananciaBruta);
 
