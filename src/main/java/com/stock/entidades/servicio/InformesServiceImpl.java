@@ -112,20 +112,8 @@ public class InformesServiceImpl implements InformesService {
                 .sum();
         dto.setTotalBotellas(totalBotellas);
 
-        // DEBUG: imprimir todos los vinos en detallesVino
-        System.out.println("=== DEBUG INFORME mes=" + mes + " anio=" + anio + " | detallesVino.size=" + detallesVino.size() + " | ventasRealizadas.size=" + ventasRealizadas.size() + " ===");
-        for (VentaDetalle d : detallesVino) {
-            int bots2 = resolverBotellas(d);
-            BigDecimal pu2 = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-            System.out.printf("  [TODOS] ventaId=%d | vino=%-30s | cant=%d botellas=%d | precioUnit=%s | subtotalGuardado=%s%n",
-                    d.getVenta().getId(),
-                    d.getVino().getNombre(),
-                    d.getCantidad() != null ? d.getCantidad() : 0,
-                    bots2, pu2,
-                    d.getSubtotal());
-        }
-        // DEBUG: imprimir detalles de El Enemigo Malbec
-        System.out.println("=== DEBUG El Enemigo Malbec ===");
+        // DEBUG: El Enemigo Malbec
+        System.out.println("=== DEBUG El Enemigo Malbec (mes=" + mes + " anio=" + anio + ") ===");
         for (VentaDetalle d : detallesVino) {
             if (d.getVino().getNombre() != null && d.getVino().getNombre().toLowerCase().contains("enemigo")) {
                 int bots = resolverBotellas(d);
@@ -136,7 +124,7 @@ public class InformesServiceImpl implements InformesService {
                 BigDecimal costoLin = cc.add(cf).multiply(BigDecimal.valueOf(bots));
                 String lista = d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "null";
                 boolean esCaja = d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja());
-                System.out.printf("  ventaId=%d | lista=%-15s esCaja=%b | cant=%d botellas=%d | precioUnit=%s | ingresoLinea=%s | costoUnit=%s | costoLinea=%s%n",
+                System.out.printf("  ventaId=%d | lista=%-20s esCaja=%b | cant=%d -> botellas=%d | precioUnit=%s | ingreso=%s | costoUnit=%s | costo=%s%n",
                         d.getVenta().getId(), lista, esCaja,
                         d.getCantidad() != null ? d.getCantidad() : 0, bots,
                         pu, ingrLin, cc.add(cf), costoLin);
