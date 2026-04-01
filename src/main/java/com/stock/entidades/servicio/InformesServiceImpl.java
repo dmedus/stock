@@ -270,10 +270,10 @@ public class InformesServiceImpl implements InformesService {
 
         BigDecimal costo = detalles.stream()
                 .map(d -> {
-                    int botellas = resolverBotellas(d);
+                    int bots = resolverBotellas(d);
                     BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
                     BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-                    return cc.add(cf).multiply(BigDecimal.valueOf(botellas));
+                    return cc.add(cf).multiply(BigDecimal.valueOf(bots));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         u.setCosto(costo);
