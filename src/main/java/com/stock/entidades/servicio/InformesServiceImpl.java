@@ -112,35 +112,34 @@ public class InformesServiceImpl implements InformesService {
                 .sum();
         dto.setTotalBotellas(totalBotellas);
 
-        // DEBUG: El Enemigo Malbec
-        System.out.println("=== DEBUG El Enemigo Malbec (mes=" + mes + " anio=" + anio + ") ===");
+        // DEBUG: El Enemigo Malbec y Nicasia
+        System.out.println("=== DEBUG VINOS (mes=" + mes + " anio=" + anio + ") ===");
         for (VentaDetalle d : detallesVino) {
-            if (d.getVino().getNombre() != null && d.getVino().getNombre().toLowerCase().contains("enemigo")) {
+            String nombre = d.getVino().getNombre() != null ? d.getVino().getNombre().toLowerCase() : "";
+            if (nombre.contains("enemigo") || nombre.contains("nicasia")) {
                 int bots = resolverBotellas(d);
                 BigDecimal pu = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-                BigDecimal ingrLin = pu.multiply(BigDecimal.valueOf(bots));
+                BigDecimal subtotalLinea = d.getSubtotal() != null ? d.getSubtotal() : pu.multiply(BigDecimal.valueOf(d.getCantidad() != null ? d.getCantidad() : 0));
                 BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
                 BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
                 BigDecimal costoLin = cc.add(cf).multiply(BigDecimal.valueOf(bots));
                 String lista = d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "null";
                 boolean esCaja = d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja());
-                System.out.printf("  ventaId=%d | lista=%-20s esCaja=%b | cant=%d -> botellas=%d | precioUnit=%s | ingreso=%s | costoUnit=%s | costo=%s%n",
-                        d.getVenta().getId(), lista, esCaja,
+                System.out.printf("  [%s] ventaId=%d | lista=%-20s esCaja=%b | cant=%d -> botellas=%d | precioUnit=%s | subtotalBD=%s | costoUnit=%s | costo=%s%n",
+                        d.getVino().getNombre(), d.getVenta().getId(), lista, esCaja,
                         d.getCantidad() != null ? d.getCantidad() : 0, bots,
-                        pu, ingrLin, cc.add(cf), costoLin);
+                        pu, subtotalLinea, cc.add(cf), costoLin);
             }
         }
         System.out.println("=== FIN DEBUG ===");
 
-        // Ingreso = botellas físicas × precioUnitario (por botella).
-        // El subtotal guardado en el detalle es cantidad(cajas) × precioUnitario,
-        // que es incorrecto para ventas por caja. Por eso recalculamos aquí.
+        // Ingreso = subtotal guardado en cada línea (cant × precioUnitario al momento de la venta).
+        // Es la fuente más confiable independientemente de si precioUnitario es por botella o por caja.
         BigDecimal ingresoRealizadas = detallesVino.stream()
-                .map(d -> {
-                    int botellas = resolverBotellas(d);
-                    BigDecimal pu = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-                    return pu.multiply(BigDecimal.valueOf(botellas));
-                })
+                .map(d -> d.getSubtotal() != null ? d.getSubtotal()
+                        : (d.getPrecioUnitario() != null && d.getCantidad() != null
+                                ? d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()))
+                                : BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // ---- Rentabilidad ----
@@ -179,8 +178,10 @@ public class InformesServiceImpl implements InformesService {
         for (VentaDetalle d : detallesVino) {
             Long vinoId    = d.getVino().getId();
             int  botellas  = resolverBotellas(d);
-            BigDecimal pu  = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-            BigDecimal sub = pu.multiply(BigDecimal.valueOf(botellas));
+            BigDecimal sub = d.getSubtotal() != null ? d.getSubtotal()
+                    : (d.getPrecioUnitario() != null && d.getCantidad() != null
+                            ? d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()))
+                            : BigDecimal.ZERO);
             BigDecimal cc  = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
             BigDecimal cf  = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
             BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(botellas));
@@ -267,11 +268,10 @@ public class InformesServiceImpl implements InformesService {
         u.setCosto(costo);
 
         BigDecimal subtotal = detalles.stream()
-                .map(d -> {
-                    int bots = resolverBotellas(d);
-                    BigDecimal pu = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
-                    return pu.multiply(BigDecimal.valueOf(bots));
-                })
+                .map(d -> d.getSubtotal() != null ? d.getSubtotal()
+                        : (d.getPrecioUnitario() != null && d.getCantidad() != null
+                                ? d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()))
+                                : BigDecimal.ZERO))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal ganancia = subtotal.subtract(costo);
         u.setGanancia(ganancia);
