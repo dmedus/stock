@@ -118,36 +118,16 @@ public class InformesServiceImpl implements InformesService {
         dto.setTotalBotellas(totalBotellas);
 
         // ---- Rentabilidad ----
+        // costoCompra está guardado por unidad vendida (caja o botella según la lista),
+        // por eso usamos cantidad directamente, NO resolverBotellas.
         BigDecimal costoTotal = detallesVino.stream()
                 .map(d -> {
-                    int botellas = resolverBotellas(d);
+                    int cant = d.getCantidad() != null ? d.getCantidad() : 0;
                     BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
                     BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-                    return cc.add(cf).multiply(BigDecimal.valueOf(botellas));
+                    return cc.add(cf).multiply(BigDecimal.valueOf(cant));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // DEBUG TEMPORAL
-        System.out.println("=== DEBUG INFORME " + mes + "/" + anio + " ===");
-        System.out.println("ventasRealizadas: " + ventasRealizadas.size());
-        System.out.println("ingresoRealizadas: " + ingresoRealizadas);
-        System.out.println("detallesVino: " + detallesVino.size());
-        for (VentaDetalle d : detallesVino) {
-            int bots = resolverBotellas(d);
-            BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
-            BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-            System.out.println("  Vino=" + d.getVino().getNombre()
-                + " | cant=" + d.getCantidad()
-                + " | botellas(resuelto)=" + bots
-                + " | costoCompra=" + cc
-                + " | costoFlete=" + cf
-                + " | costoLinea=" + cc.add(cf).multiply(BigDecimal.valueOf(bots))
-                + " | subtotal=" + d.getSubtotal()
-                + " | lista=" + (d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "null")
-                + " | esPorCaja=" + (d.getListaPrecio() != null ? d.getListaPrecio().getEsPorCaja() : "null"));
-        }
-        System.out.println("costoTotal: " + costoTotal);
-        System.out.println("=== FIN DEBUG ===");
 
         BigDecimal gananciaBruta = ingresoRealizadas.subtract(costoTotal);
         dto.setSubtotalVinos(ingresoRealizadas);
@@ -173,10 +153,11 @@ public class InformesServiceImpl implements InformesService {
         for (VentaDetalle d : detallesVino) {
             Long vinoId    = d.getVino().getId();
             int  botellas  = resolverBotellas(d);
+            int  cant      = d.getCantidad() != null ? d.getCantidad() : 0;
             BigDecimal sub = d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO;
             BigDecimal cc  = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
             BigDecimal cf  = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-            BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(botellas));
+            BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(cant));
 
             nombreMap.putIfAbsent(vinoId, d.getVino().getNombre());
             botellasMap.merge(vinoId, new long[]{botellas}, (a, b) -> new long[]{a[0] + b[0]});
@@ -251,10 +232,10 @@ public class InformesServiceImpl implements InformesService {
 
         BigDecimal costo = detalles.stream()
                 .map(d -> {
-                    int bots = resolverBotellas(d);
+                    int cant = d.getCantidad() != null ? d.getCantidad() : 0;
                     BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
                     BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-                    return cc.add(cf).multiply(BigDecimal.valueOf(bots));
+                    return cc.add(cf).multiply(BigDecimal.valueOf(cant));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         u.setCosto(costo);
