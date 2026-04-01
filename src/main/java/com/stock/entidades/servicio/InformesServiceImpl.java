@@ -125,8 +125,9 @@ public class InformesServiceImpl implements InformesService {
                 BigDecimal costoLin = cc.add(cf).multiply(BigDecimal.valueOf(bots));
                 String lista = d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "null";
                 boolean esCaja = d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja());
-                System.out.printf("  [%s] ventaId=%d | lista=%-20s esCaja=%b | cant=%d -> botellas=%d | precioUnit=%s | subtotalBD=%s | costoUnit=%s | costo=%s%n",
+                System.out.printf("  [%s] ventaId=%d | lista=%-20s esCaja=%b promoSeis=%b | cant=%d -> botellas=%d | precioUnit=%s | subtotalBD=%s | costoUnit=%s | costo=%s%n",
                         d.getVino().getNombre(), d.getVenta().getId(), lista, esCaja,
+                        Boolean.TRUE.equals(d.getPromoSeis()),
                         d.getCantidad() != null ? d.getCantidad() : 0, bots,
                         pu, subtotalLinea, cc.add(cf), costoLin);
             }
@@ -294,6 +295,10 @@ public class InformesServiceImpl implements InformesService {
     private int resolverBotellas(VentaDetalle d) {
         int cant = d.getCantidad() != null ? d.getCantidad() : 0;
         if (d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja())) {
+            // promoSeis = precio de caja aplicado a botellas sueltas → cant ya está en botellas
+            if (Boolean.TRUE.equals(d.getPromoSeis())) {
+                return cant;
+            }
             int porCaja = (d.getVino() != null && d.getVino().getCantVinosxcaja() != null)
                     ? d.getVino().getCantVinosxcaja() : 1;
             return cant * porCaja;
