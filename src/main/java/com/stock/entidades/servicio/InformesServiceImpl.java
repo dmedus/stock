@@ -113,7 +113,7 @@ public class InformesServiceImpl implements InformesService {
                 .collect(Collectors.toList());
 
         int totalBotellas = detallesVino.stream()
-                .mapToInt(this::resolverBotellas)
+                .mapToInt(d -> d.getCantidad() != null ? d.getCantidad() : 0)
                 .sum();
         dto.setTotalBotellas(totalBotellas);
 
@@ -152,7 +152,6 @@ public class InformesServiceImpl implements InformesService {
 
         for (VentaDetalle d : detallesVino) {
             Long vinoId    = d.getVino().getId();
-            int  botellas  = resolverBotellas(d);
             int  cant      = d.getCantidad() != null ? d.getCantidad() : 0;
             BigDecimal sub = d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO;
             BigDecimal cc  = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
@@ -160,7 +159,7 @@ public class InformesServiceImpl implements InformesService {
             BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(cant));
 
             nombreMap.putIfAbsent(vinoId, d.getVino().getNombre());
-            botellasMap.merge(vinoId, new long[]{botellas}, (a, b) -> new long[]{a[0] + b[0]});
+            botellasMap.merge(vinoId, new long[]{cant}, (a, b) -> new long[]{a[0] + b[0]});
             monetarioMap.merge(vinoId,
                     new BigDecimal[]{sub, costo},
                     (a, b) -> new BigDecimal[]{a[0].add(b[0]), a[1].add(b[1])});
@@ -227,7 +226,7 @@ public class InformesServiceImpl implements InformesService {
                 .filter(d -> d.getVino() != null)
                 .collect(Collectors.toList());
 
-        int botellas = detalles.stream().mapToInt(this::resolverBotellas).sum();
+        int botellas = detalles.stream().mapToInt(d -> d.getCantidad() != null ? d.getCantidad() : 0).sum();
         u.setBotellas(botellas);
 
         BigDecimal costo = detalles.stream()
