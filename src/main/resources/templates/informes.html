@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+    <meta charset="utf-8">
+</head>
+<body>
+
+<header th:replace="layout/layout :: header"></header>
+
+<div class="container-fluid py-4">
+
+    <h1 class="mb-4" th:text="${titulo}"></h1>
+
+    <!-- Selector de mes/año -->
+    <form method="get" action="/informes" class="form-inline mb-4">
+        <div class="form-group mr-2">
+            <label class="mr-1">Mes:</label>
+            <select name="mes" class="form-control">
+                <option th:each="m : ${#numbers.sequence(1,12)}"
+                        th:value="${m}"
+                        th:selected="${m == mesSeleccionado}"
+                        th:text="${{1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'}[m]}">
+                </option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <label class="mr-1">Año:</label>
+            <select name="anio" class="form-control">
+                <option th:each="a : ${aniosDisponibles}"
+                        th:value="${a}"
+                        th:selected="${a == anioSeleccionado}"
+                        th:text="${a}">
+                </option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Ver informe</button>
+    </form>
+
+    <!-- Título del período -->
+    <h4 class="mb-3 text-muted"
+        th:text="${informe.nombreMes} + ' ' + ${informe.anio}">
+    </h4>
+
+    <!-- ===================== FILA 1: Dinero ===================== -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white font-weight-bold">Ingresos del mes</div>
+                <div class="card-body text-center">
+                    <h3 class="text-primary" th:text="${#numbers.formatCurrency(informe.totalIngresos)}"></h3>
+                    <small class="text-muted">Total facturado (ventas activas)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-header bg-success text-white font-weight-bold">Cobrado</div>
+                <div class="card-body text-center">
+                    <h3 class="text-success" th:text="${#numbers.formatCurrency(informe.totalCobrado)}"></h3>
+                    <small class="text-muted">Dinero efectivamente recibido</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100"
+                 th:classappend="${informe.totalPorCobrar.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'border-warning' : 'border-secondary'">
+                <div class="card-header text-white font-weight-bold"
+                     th:classappend="${informe.totalPorCobrar.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'bg-warning' : 'bg-secondary'">
+                    Por cobrar
+                </div>
+                <div class="card-body text-center">
+                    <h3 th:classappend="${informe.totalPorCobrar.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-warning' : 'text-secondary'"
+                        th:text="${#numbers.formatCurrency(informe.totalPorCobrar)}"></h3>
+                    <small class="text-muted">Saldo pendiente de cobro</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info h-100">
+                <div class="card-header bg-info text-white font-weight-bold">Ticket promedio</div>
+                <div class="card-body text-center">
+                    <h3 class="text-info" th:text="${#numbers.formatCurrency(informe.ticketPromedio)}"></h3>
+                    <small class="text-muted">Por venta</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== FILA 2: Operaciones ===================== -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white font-weight-bold">Ventas realizadas</div>
+                <div class="card-body text-center">
+                    <h3 th:text="${informe.cantidadVentas}"></h3>
+                    <small class="text-muted">Ventas activas en el mes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white font-weight-bold">Botellas vendidas</div>
+                <div class="card-body text-center">
+                    <h3 th:text="${informe.totalBotellas}"></h3>
+                    <small class="text-muted">Unidades de vino</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white font-weight-bold">Entregas</div>
+                <div class="card-body text-center">
+                    <h3>
+                        <span class="text-success" th:text="${informe.ventasEntregadas}"></span>
+                        <small class="text-muted"> / </small>
+                        <span th:text="${informe.cantidadVentas}"></span>
+                    </h3>
+                    <small class="text-muted">Entregadas / Total</small>
+                    <div class="progress mt-2" style="height:8px;" th:if="${informe.cantidadVentas > 0}">
+                        <div class="progress-bar bg-success"
+                             th:style="'width:' + ${#numbers.formatDecimal(informe.ventasEntregadas * 100.0 / informe.cantidadVentas, 1, 0)} + '%'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white font-weight-bold">Clientes únicos</div>
+                <div class="card-body text-center">
+                    <h3 th:text="${informe.clientesUnicos}"></h3>
+                    <small class="text-muted">Clientes distintos que compraron</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== RENTABILIDAD ===================== -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white font-weight-bold">Rentabilidad del mes</div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Ingresos (botellas)</p>
+                            <h4 th:text="${#numbers.formatCurrency(informe.totalIngresos)}"></h4>
+                        </div>
+                        <div class="col-md-2 align-self-center text-muted font-weight-bold" style="font-size:1.5rem;">−</div>
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Costo total (compra + flete)</p>
+                            <h4 th:text="${#numbers.formatCurrency(informe.costoTotal)}"></h4>
+                        </div>
+                        <div class="col-md-2 align-self-center text-muted font-weight-bold" style="font-size:1.5rem;">=</div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Ganancia bruta</p>
+                            <h3 th:classappend="${informe.gananciaBruta.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+                                th:text="${#numbers.formatCurrency(informe.gananciaBruta)}">
+                            </h3>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Margen bruto</p>
+                            <h3 th:if="${informe.margenBruto != null}"
+                                th:classappend="${informe.margenBruto.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'text-success' : 'text-danger'"
+                                th:text="${informe.margenBruto} + '%'">
+                            </h3>
+                            <h3 th:if="${informe.margenBruto == null}" class="text-muted">—</h3>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-2 mb-0" style="font-size:0.85rem;">
+                        * El costo incluye costo de compra y costo de flete por botella cargados en cada vino.
+                        Solo se calculan las ventas de vinos individuales (no combos).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== TOP 3 VINOS ===================== -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white font-weight-bold">Top 3 vinos más vendidos</div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0" th:if="${not #lists.isEmpty(informe.topVinos)}">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Vino</th>
+                                <th class="text-right">Botellas</th>
+                                <th class="text-right">Ingresos</th>
+                                <th class="text-right">Costo</th>
+                                <th class="text-right">Ganancia</th>
+                                <th class="text-right">Margen %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="vino, stat : ${informe.topVinos}"
+                                th:classappend="${vino.ganancia.compareTo(T(java.math.BigDecimal).ZERO) < 0} ? 'table-danger' : ''">
+                                <td>
+                                    <span th:if="${stat.index == 0}">🥇</span>
+                                    <span th:if="${stat.index == 1}">🥈</span>
+                                    <span th:if="${stat.index == 2}">🥉</span>
+                                </td>
+                                <td th:text="${vino.nombre}"></td>
+                                <td class="text-right" th:text="${vino.botellas}"></td>
+                                <td class="text-right" th:text="${#numbers.formatCurrency(vino.ingresos)}"></td>
+                                <td class="text-right" th:text="${#numbers.formatCurrency(vino.costo)}"></td>
+                                <td class="text-right"
+                                    th:classappend="${vino.ganancia.compareTo(T(java.math.BigDecimal).ZERO) < 0} ? 'text-danger font-weight-bold' : 'text-success font-weight-bold'"
+                                    th:text="${#numbers.formatCurrency(vino.ganancia)}">
+                                </td>
+                                <td class="text-right">
+                                    <span th:if="${vino.margen != null}" th:text="${vino.margen} + '%'"></span>
+                                    <span th:if="${vino.margen == null}" class="text-muted">—</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${#lists.isEmpty(informe.topVinos)}" class="p-3 text-muted">
+                        No hay ventas de vinos registradas en este período.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== NOTA FINAL ===================== -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-light border">
+                <strong>Aclaración:</strong> Los ingresos y cantidades incluyen todas las ventas activas del período,
+                independientemente de si fueron entregadas o cobradas. El margen se calcula sobre costos de compra y
+                flete cargados en cada vino.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>
