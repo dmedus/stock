@@ -255,18 +255,14 @@ public class InformesServiceImpl implements InformesService {
 
     /**
      * Devuelve la cantidad real de botellas de un detalle.
-     * Si la lista de precio es por caja/mayorista/bulto, multiplica por cantVinosxcaja
-     * (misma lógica que entregarVenta para el descuento de stock).
+     * Usa el flag esPorCaja de ListaPrecio (mismo criterio que la pestaña Rentabilidad).
      */
     private int resolverBotellas(VentaDetalle d) {
         int cant = d.getCantidad() != null ? d.getCantidad() : 0;
-        if (d.getListaPrecio() != null) {
-            String nombre = d.getListaPrecio().getNombre().toLowerCase();
-            if (nombre.contains("caja") || nombre.contains("mayorista") || nombre.contains("bulto")) {
-                int porCaja = (d.getVino() != null && d.getVino().getCantVinosxcaja() != null)
-                        ? d.getVino().getCantVinosxcaja() : 1;
-                return cant * porCaja;
-            }
+        if (d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja())) {
+            int porCaja = (d.getVino() != null && d.getVino().getCantVinosxcaja() != null)
+                    ? d.getVino().getCantVinosxcaja() : 1;
+            return cant * porCaja;
         }
         return cant;
     }
