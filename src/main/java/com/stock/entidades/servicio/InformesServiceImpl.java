@@ -118,6 +118,12 @@ public class InformesServiceImpl implements InformesService {
     private BigDecimal toBigDecimal(Object val) {
         if (val == null) return BigDecimal.ZERO;
         if (val instanceof BigDecimal) return (BigDecimal) val;
+        if (val instanceof Double)     return BigDecimal.valueOf((Double) val);
+        if (val instanceof Float)      return BigDecimal.valueOf(((Float) val).doubleValue());
+        if (val instanceof Long)       return BigDecimal.valueOf((Long) val);
+        if (val instanceof Integer)    return BigDecimal.valueOf(((Integer) val).longValue());
+        // fallback para cualquier otro Number
+        if (val instanceof Number)     return BigDecimal.valueOf(((Number) val).doubleValue());
         return new BigDecimal(val.toString());
     }
 
