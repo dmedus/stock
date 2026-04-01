@@ -16,10 +16,10 @@
         <div class="form-group mr-2">
             <label class="mr-1">Mes:</label>
             <select name="mes" class="form-control">
-                <option th:each="m : ${#numbers.sequence(1,12)}"
-                        th:value="${m}"
-                        th:selected="${m == mesSeleccionado}"
-                        th:text="${{1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'}[m]}">
+                <option th:each="entry : ${nombresMes}"
+                        th:value="${entry.key}"
+                        th:selected="${entry.key == mesSeleccionado}"
+                        th:text="${entry.value}">
                 </option>
             </select>
         </div>

@@ -45,5 +45,5 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
      * Años distintos con ventas registradas, para el selector del informe.
      */
     @Query("SELECT DISTINCT YEAR(v.fecha) FROM Venta v WHERE v.activo = true ORDER BY YEAR(v.fecha) DESC")
-    List<Integer> findAniosConVentas();
+    List<Object> findAniosConVentas();
 }

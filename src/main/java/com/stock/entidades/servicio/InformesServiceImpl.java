@@ -101,9 +101,13 @@ public class InformesServiceImpl implements InformesService {
     @Override
     @Transactional(readOnly = true)
     public List<Integer> getAniosDisponibles() {
-        List<Integer> anios = ventaRepository.findAniosConVentas();
+        List<Integer> anios = new ArrayList<>();
+        for (Object val : ventaRepository.findAniosConVentas()) {
+            if (val != null) {
+                anios.add(((Number) val).intValue());
+            }
+        }
         if (anios.isEmpty()) {
-            anios = new ArrayList<>();
             anios.add(LocalDate.now().getYear());
         }
         return anios;
