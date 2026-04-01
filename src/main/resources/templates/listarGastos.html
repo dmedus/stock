@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout/layout :: head">
+    <meta charset="utf-8">
+</head>
+<body>
+
+<header th:replace="layout/layout :: header"></header>
+<div th:replace="layout/layout :: alerts"></div>
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 th:text="${titulo}"></h1>
+        <a href="/gastoForm" class="btn btn-primary">+ Nuevo Gasto</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0" th:if="${not #lists.isEmpty(gastos)}">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th class="text-right">Monto</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="gasto : ${gastos}">
+                        <td th:text="${gasto.fecha}"></td>
+                        <td th:text="${gasto.descripcion}"></td>
+                        <td th:text="${gasto.categoria != null ? gasto.categoria : '—'}"></td>
+                        <td class="text-right" th:text="${#numbers.formatCurrency(gasto.monto)}"></td>
+                        <td class="text-center">
+                            <a th:href="@{/gastoForm/{id}(id=${gasto.id})}" class="btn btn-sm btn-warning">Editar</a>
+                            <a th:href="@{/eliminarGasto/{id}(id=${gasto.id})}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Eliminar este gasto?')">Eliminar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${#lists.isEmpty(gastos)}" class="p-4 text-muted text-center">
+                No hay gastos registrados.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

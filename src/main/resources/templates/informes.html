@@ -148,6 +148,7 @@
             <div class="card">
                 <div class="card-header bg-dark text-white font-weight-bold">Rentabilidad del mes</div>
                 <div class="card-body">
+                    <!-- Fila: Ingresos - Costo -->
                     <div class="row text-center">
                         <div class="col-md-4">
                             <p class="text-muted mb-1">Ingresos (botellas)</p>
@@ -161,7 +162,8 @@
                         <div class="col-md-2 align-self-center text-muted font-weight-bold" style="font-size:1.5rem;">=</div>
                     </div>
                     <hr>
-                    <div class="row text-center">
+                    <!-- Ganancia bruta y margen -->
+                    <div class="row text-center mb-3">
                         <div class="col-md-6">
                             <p class="text-muted mb-1">Ganancia bruta</p>
                             <h3 th:classappend="${informe.gananciaBruta.signum() >= 0} ? 'text-success' : 'text-danger'"
@@ -175,9 +177,32 @@
                             </h3>
                         </div>
                     </div>
+                    <!-- Fila: Gastos -->
+                    <div class="row text-center align-items-center">
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Ganancia bruta</p>
+                            <h5 th:text="${#numbers.formatCurrency(informe.gananciaBruta)}"></h5>
+                        </div>
+                        <div class="col-md-2 text-muted font-weight-bold" style="font-size:1.5rem;">−</div>
+                        <div class="col-md-4">
+                            <p class="text-muted mb-1">Gastos del mes</p>
+                            <h5 class="text-danger" th:text="${#numbers.formatCurrency(informe.totalGastos)}"></h5>
+                            <small><a href="/listarGastos" class="text-muted">Ver/editar gastos</a></small>
+                        </div>
+                        <div class="col-md-2 text-muted font-weight-bold" style="font-size:1.5rem;">=</div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <p class="text-muted mb-1">Ganancia neta</p>
+                            <h2 th:classappend="${informe.gananciaNeta.signum() >= 0} ? 'text-success' : 'text-danger'"
+                                th:text="${#numbers.formatCurrency(informe.gananciaNeta)}">
+                            </h2>
+                        </div>
+                    </div>
                     <p class="text-muted mt-2 mb-0" style="font-size:0.85rem;">
                         * El costo incluye costo de compra y costo de flete por botella cargados en cada vino.
-                        Solo se calculan las ventas de vinos individuales (no combos).
+                        Solo se calculan las ventas de vinos individuales (no combos). Los gastos son los registrados en el módulo de Gastos para el mismo período.
                     </p>
                 </div>
             </div>
@@ -227,6 +252,51 @@
                     </table>
                     <div th:if="${#lists.isEmpty(informe.topVinos)}" class="p-3 text-muted">
                         No hay ventas de vinos registradas en este período.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== RESUMEN POR USUARIO ===================== -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white font-weight-bold">Rendimiento por vendedor</div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0" th:if="${not #lists.isEmpty(informe.resumenUsuarios)}">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Vendedor</th>
+                                <th class="text-right">Ventas realizadas</th>
+                                <th class="text-right">Botellas</th>
+                                <th class="text-right">Ingresos</th>
+                                <th class="text-right">Costo</th>
+                                <th class="text-right">Ganancia</th>
+                                <th class="text-right">Margen %</th>
+                                <th class="text-right">Ticket promedio</th>
+                                <th class="text-right">Clientes únicos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${informe.resumenUsuarios}"
+                                th:classappend="${u.ganancia.signum() < 0} ? 'table-danger' : ''">
+                                <td><strong th:text="${u.usuario}"></strong></td>
+                                <td class="text-right" th:text="${u.ventasRealizadas}"></td>
+                                <td class="text-right" th:text="${u.botellas}"></td>
+                                <td class="text-right" th:text="${#numbers.formatCurrency(u.ingresos)}"></td>
+                                <td class="text-right" th:text="${#numbers.formatCurrency(u.costo)}"></td>
+                                <td class="text-right"
+                                    th:classappend="${u.ganancia.signum() >= 0} ? 'text-success font-weight-bold' : 'text-danger font-weight-bold'"
+                                    th:text="${#numbers.formatCurrency(u.ganancia)}"></td>
+                                <td class="text-right" th:text="${u.margen} + '%'"></td>
+                                <td class="text-right" th:text="${#numbers.formatCurrency(u.ticketPromedio)}"></td>
+                                <td class="text-right" th:text="${u.clientesUnicos}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${#lists.isEmpty(informe.resumenUsuarios)}" class="p-3 text-muted">
+                        No hay ventas realizadas en este período.
                     </div>
                 </div>
             </div>

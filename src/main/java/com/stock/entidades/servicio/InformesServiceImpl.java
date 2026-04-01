@@ -2,9 +2,12 @@ package com.stock.entidades.servicio;
 
 import com.stock.controlador.dto.InformesMesDTO;
 import com.stock.controlador.dto.TopVinoMesDTO;
+import com.stock.controlador.dto.UsuarioResumenMesDTO;
+import com.stock.entidades.Gasto;
 import com.stock.entidades.Venta;
 import com.stock.entidades.VentaDetalle;
 import com.stock.entidades.Pago;
+import com.stock.repositorio.GastoRepository;
 import com.stock.repositorio.PagoRepository;
 import com.stock.repositorio.VentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,9 @@ public class InformesServiceImpl implements InformesService {
 
     @Autowired
     private PagoRepository pagoRepository;
+
+    @Autowired
+    private GastoRepository gastoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -90,8 +96,9 @@ public class InformesServiceImpl implements InformesService {
                 ? totalIngresos.divide(BigDecimal.valueOf(cantidadVentas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO);
 
-        // ---- Detalles de vino (excluye combos) ----
+        // ---- Detalles solo de ventas realizadas (entregadas y pagadas) ----
         List<VentaDetalle> detallesVino = ventas.stream()
+                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
                 .flatMap(v -> v.getDetalles().stream())
                 .filter(d -> d.getVino() != null)
                 .collect(Collectors.toList());
@@ -162,7 +169,87 @@ public class InformesServiceImpl implements InformesService {
                 .collect(Collectors.toList());
 
         dto.setTopVinos(topVinos);
+
+        // ---- Resumen por usuario (ventas realizadas) ----
+        List<Venta> ventasRealizadas = ventas.stream()
+                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
+                .collect(Collectors.toList());
+
+        Map<String, List<Venta>> porUsuario = ventasRealizadas.stream()
+                .filter(v -> v.getUsuario() != null)
+                .collect(Collectors.groupingBy(v -> v.getUsuario().getUsuario()));
+
+        List<UsuarioResumenMesDTO> resumenUsuarios = porUsuario.entrySet().stream()
+                .map(e -> buildResumenUsuario(e.getKey(), e.getValue()))
+                .sorted((a, b) -> b.getIngresos().compareTo(a.getIngresos()))
+                .collect(Collectors.toList());
+
+        dto.setResumenUsuarios(resumenUsuarios);
+
+        // ---- Gastos del mes ----
+        List<Gasto> gastos = gastoRepository.findByFechaBetweenOrderByFechaDesc(inicio, fin);
+        BigDecimal totalGastos = gastos.stream()
+                .map(g -> g.getMonto() != null ? g.getMonto() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        dto.setTotalGastos(totalGastos);
+        dto.setGananciaNeta(gananciaBruta.subtract(totalGastos));
+
         return dto;
+    }
+
+    private UsuarioResumenMesDTO buildResumenUsuario(String nombreUsuario, List<Venta> ventasUsuario) {
+        UsuarioResumenMesDTO u = new UsuarioResumenMesDTO();
+        u.setUsuario(nombreUsuario);
+        u.setVentasRealizadas((long) ventasUsuario.size());
+
+        BigDecimal ingresos = ventasUsuario.stream()
+                .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        u.setIngresos(ingresos);
+
+        u.setTicketPromedio(!ventasUsuario.isEmpty()
+                ? ingresos.divide(BigDecimal.valueOf(ventasUsuario.size()), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO);
+
+        long clientesUnicos = ventasUsuario.stream()
+                .filter(v -> v.getCliente() != null)
+                .map(v -> v.getCliente().getId())
+                .distinct().count();
+        u.setClientesUnicos(clientesUnicos);
+
+        List<VentaDetalle> detalles = ventasUsuario.stream()
+                .flatMap(v -> v.getDetalles().stream())
+                .filter(d -> d.getVino() != null)
+                .collect(Collectors.toList());
+
+        int botellas = detalles.stream().mapToInt(this::resolverBotellas).sum();
+        u.setBotellas(botellas);
+
+        BigDecimal costo = detalles.stream()
+                .map(d -> {
+                    int bots = resolverBotellas(d);
+                    BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
+                    BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
+                    return cc.add(cf).multiply(BigDecimal.valueOf(bots));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        u.setCosto(costo);
+
+        BigDecimal subtotal = detalles.stream()
+                .map(d -> d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal ganancia = subtotal.subtract(costo);
+        u.setGanancia(ganancia);
+
+        if (subtotal.compareTo(BigDecimal.ZERO) > 0) {
+            u.setMargen(ganancia.divide(subtotal, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"))
+                    .setScale(1, RoundingMode.HALF_UP));
+        } else {
+            u.setMargen(BigDecimal.ZERO);
+        }
+
+        return u;
     }
 
     /**

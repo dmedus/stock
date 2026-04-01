@@ -30,8 +30,15 @@ public class InformesMesDTO {
     private BigDecimal gananciaBruta;
     private BigDecimal margenBruto;
 
+    // Gastos
+    private BigDecimal totalGastos;
+    private BigDecimal gananciaNeta;
+
     // Top vinos
     private List<TopVinoMesDTO> topVinos;
+
+    // Resumen por usuario
+    private List<UsuarioResumenMesDTO> resumenUsuarios;
 
     public int getMes() { return mes; }
     public void setMes(int mes) { this.mes = mes; }
@@ -87,6 +94,15 @@ public class InformesMesDTO {
     public BigDecimal getMargenBruto() { return margenBruto; }
     public void setMargenBruto(BigDecimal margenBruto) { this.margenBruto = margenBruto; }
 
+    public BigDecimal getTotalGastos() { return totalGastos; }
+    public void setTotalGastos(BigDecimal totalGastos) { this.totalGastos = totalGastos; }
+
+    public BigDecimal getGananciaNeta() { return gananciaNeta; }
+    public void setGananciaNeta(BigDecimal gananciaNeta) { this.gananciaNeta = gananciaNeta; }
+
     public List<TopVinoMesDTO> getTopVinos() { return topVinos; }
     public void setTopVinos(List<TopVinoMesDTO> topVinos) { this.topVinos = topVinos; }
+
+    public List<UsuarioResumenMesDTO> getResumenUsuarios() { return resumenUsuarios; }
+    public void setResumenUsuarios(List<UsuarioResumenMesDTO> resumenUsuarios) { this.resumenUsuarios = resumenUsuarios; }
 }
