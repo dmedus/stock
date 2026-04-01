@@ -12,6 +12,9 @@ public class InformesMesDTO {
     // Resumen de ventas
     private BigDecimal totalIngresos;
     private BigDecimal totalCobrado;
+    private BigDecimal cobradoEfectivo;
+    private BigDecimal cobradoTransferencia;
+    private BigDecimal cobradoTarjeta;
     private BigDecimal totalPorCobrar;
     private Long cantidadVentas;
     private BigDecimal ticketPromedio;
@@ -44,6 +47,15 @@ public class InformesMesDTO {
 
     public BigDecimal getTotalCobrado() { return totalCobrado; }
     public void setTotalCobrado(BigDecimal totalCobrado) { this.totalCobrado = totalCobrado; }
+
+    public BigDecimal getCobradoEfectivo() { return cobradoEfectivo; }
+    public void setCobradoEfectivo(BigDecimal cobradoEfectivo) { this.cobradoEfectivo = cobradoEfectivo; }
+
+    public BigDecimal getCobradoTransferencia() { return cobradoTransferencia; }
+    public void setCobradoTransferencia(BigDecimal cobradoTransferencia) { this.cobradoTransferencia = cobradoTransferencia; }
+
+    public BigDecimal getCobradoTarjeta() { return cobradoTarjeta; }
+    public void setCobradoTarjeta(BigDecimal cobradoTarjeta) { this.cobradoTarjeta = cobradoTarjeta; }
 
     public BigDecimal getTotalPorCobrar() { return totalPorCobrar; }
     public void setTotalPorCobrar(BigDecimal totalPorCobrar) { this.totalPorCobrar = totalPorCobrar; }

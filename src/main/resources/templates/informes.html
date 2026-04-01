@@ -55,7 +55,16 @@
                 <div class="card-header bg-success text-white font-weight-bold">Cobrado</div>
                 <div class="card-body text-center">
                     <h3 class="text-success" th:text="${#numbers.formatCurrency(informe.totalCobrado)}"></h3>
-                    <small class="text-muted">Dinero efectivamente recibido</small>
+                    <div class="mt-2 text-left" style="font-size:0.85rem;">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Efectivo:</span>
+                            <span th:text="${#numbers.formatCurrency(informe.cobradoEfectivo)}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Transferencia:</span>
+                            <span th:text="${#numbers.formatCurrency(informe.cobradoTransferencia)}"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -91,7 +100,7 @@
                 <div class="card-header bg-dark text-white font-weight-bold">Ventas realizadas</div>
                 <div class="card-body text-center">
                     <h3 th:text="${informe.cantidadVentas}"></h3>
-                    <small class="text-muted">Ventas activas en el mes</small>
+                    <small class="text-muted">Entregadas y pagadas</small>
                 </div>
             </div>
         </div>

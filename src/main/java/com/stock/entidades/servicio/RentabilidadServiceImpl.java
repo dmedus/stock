@@ -80,9 +80,10 @@ public class RentabilidadServiceImpl implements RentabilidadService {
         BigDecimal ganancia = pv.getPrecio().subtract(costoTotal);
         dto.setGanancia(ganancia);
 
-        if (costoTotal.compareTo(BigDecimal.ZERO) > 0) {
+        BigDecimal precioVenta = pv.getPrecio();
+        if (precioVenta.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal margen = ganancia
-                    .divide(costoTotal, 4, RoundingMode.HALF_UP)
+                    .divide(precioVenta, 4, RoundingMode.HALF_UP)
                     .multiply(new BigDecimal("100"))
                     .setScale(2, RoundingMode.HALF_UP);
             dto.setMargen(margen);

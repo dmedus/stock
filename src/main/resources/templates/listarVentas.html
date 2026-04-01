@@ -97,7 +97,15 @@
                                     <button type="submit" class="btn btn-info btn-sm" th:disabled="${venta.entregado}">Entregar</button>
                                 </form>
                             </td>
-                            <td><button type="button" class="btn btn-success btn-sm" data-toggle="modal" th:data-target="'#pagoModal' + ${venta.id}">Pagar</button></td>
+                            <td>
+                                <button type="button" class="btn btn-success btn-sm"
+                                        data-toggle="modal"
+                                        th:data-target="'#pagoModal' + ${venta.id}"
+                                        th:disabled="${!venta.activo}"
+                                        th:title="${!venta.activo} ? 'Venta ya completada' : ''">
+                                    Pagar
+                                </button>
+                            </td>
 							<td><a
 								class="btn btn-info btn-sm"
 								th:href="@{/verVentaDetalles/} + ${venta.id}">Ver</a></td>
@@ -120,7 +128,6 @@
             <label for="metodoPago">Método de Pago</label>
             <select class="form-control" id="metodoPago" name="metodoPago">
               <option value="Efectivo">Efectivo</option>
-              <option value="Tarjeta">Tarjeta</option>
               <option value="Transferencia">Transferencia</option>
             </select>
           </div>

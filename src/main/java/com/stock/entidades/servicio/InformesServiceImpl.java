@@ -4,6 +4,8 @@ import com.stock.controlador.dto.InformesMesDTO;
 import com.stock.controlador.dto.TopVinoMesDTO;
 import com.stock.entidades.Venta;
 import com.stock.entidades.VentaDetalle;
+import com.stock.entidades.Pago;
+import com.stock.repositorio.PagoRepository;
 import com.stock.repositorio.VentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,14 +28,17 @@ public class InformesServiceImpl implements InformesService {
     @Autowired
     private VentaRepository ventaRepository;
 
+    @Autowired
+    private PagoRepository pagoRepository;
+
     @Override
     @Transactional(readOnly = true)
     public InformesMesDTO getInformesMes(int anio, int mes) {
         LocalDate inicio = LocalDate.of(anio, mes, 1);
         LocalDate fin    = inicio.withDayOfMonth(inicio.lengthOfMonth());
 
-        // Cargar ventas activas del mes con sus detalles
-        List<Venta> ventas = ventaRepository.searchVentas(inicio, fin, null, true);
+        // Cargar TODAS las ventas del mes (activas y completadas)
+        List<Venta> ventas = ventaRepository.searchVentas(inicio, fin, null, null);
         ventas.forEach(v -> v.getDetalles().size()); // forzar lazy load
 
         InformesMesDTO dto = new InformesMesDTO();
@@ -46,12 +51,26 @@ public class InformesServiceImpl implements InformesService {
                 .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal totalCobrado = ventas.stream()
-                .map(v -> v.getPagado() != null ? v.getPagado() : BigDecimal.ZERO)
+        // Cobrado desde tabla Pago (registra método y fecha real del cobro)
+        List<Pago> pagos = pagoRepository.findByFechaBetween(inicio, fin);
+        BigDecimal totalCobrado = pagos.stream()
+                .map(Pago::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal cobradoEfectivo = pagos.stream()
+                .filter(p -> "Efectivo".equalsIgnoreCase(p.getMetodoPago()))
+                .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal cobradoTransferencia = pagos.stream()
+                .filter(p -> "Transferencia".equalsIgnoreCase(p.getMetodoPago()))
+                .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal cobradoTarjeta = pagos.stream()
+                .filter(p -> "Tarjeta".equalsIgnoreCase(p.getMetodoPago()))
+                .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long cantidadVentas    = ventas.size();
-        long ventasEntregadas  = ventas.stream().filter(v -> Boolean.TRUE.equals(v.getEntregado())).count();
+        // Ventas realizadas = entregadas Y pagadas (activo=false)
+        long cantidadVentas   = ventas.stream()
+                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
+                .count();
+        long ventasEntregadas = ventas.stream().filter(v -> Boolean.TRUE.equals(v.getEntregado())).count();
         long clientesUnicos    = ventas.stream()
                 .filter(v -> v.getCliente() != null)
                 .map(v -> v.getCliente().getId())
@@ -59,6 +78,9 @@ public class InformesServiceImpl implements InformesService {
 
         dto.setTotalIngresos(totalIngresos);
         dto.setTotalCobrado(totalCobrado);
+        dto.setCobradoEfectivo(cobradoEfectivo);
+        dto.setCobradoTransferencia(cobradoTransferencia);
+        dto.setCobradoTarjeta(cobradoTarjeta);
         dto.setTotalPorCobrar(totalIngresos.subtract(totalCobrado));
         dto.setCantidadVentas(cantidadVentas);
         dto.setVentasEntregadas(ventasEntregadas);
@@ -75,17 +97,17 @@ public class InformesServiceImpl implements InformesService {
                 .collect(Collectors.toList());
 
         int totalBotellas = detallesVino.stream()
-                .mapToInt(d -> d.getCantidad() != null ? d.getCantidad() : 0)
+                .mapToInt(this::resolverBotellas)
                 .sum();
         dto.setTotalBotellas(totalBotellas);
 
         // ---- Rentabilidad ----
         BigDecimal costoTotal = detallesVino.stream()
                 .map(d -> {
-                    int cant = d.getCantidad() != null ? d.getCantidad() : 0;
+                    int botellas = resolverBotellas(d);
                     BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
                     BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-                    return cc.add(cf).multiply(BigDecimal.valueOf(cant));
+                    return cc.add(cf).multiply(BigDecimal.valueOf(botellas));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -114,15 +136,15 @@ public class InformesServiceImpl implements InformesService {
         Map<Long, String>       nombreMap    = new LinkedHashMap<>();
 
         for (VentaDetalle d : detallesVino) {
-            Long vinoId  = d.getVino().getId();
-            int  cant    = d.getCantidad() != null ? d.getCantidad() : 0;
+            Long vinoId    = d.getVino().getId();
+            int  botellas  = resolverBotellas(d);
             BigDecimal sub = d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO;
             BigDecimal cc  = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
             BigDecimal cf  = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-            BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(cant));
+            BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(botellas));
 
             nombreMap.putIfAbsent(vinoId, d.getVino().getNombre());
-            botellasMap.merge(vinoId, new long[]{cant}, (a, b) -> new long[]{a[0] + b[0]});
+            botellasMap.merge(vinoId, new long[]{botellas}, (a, b) -> new long[]{a[0] + b[0]});
             monetarioMap.merge(vinoId,
                     new BigDecimal[]{sub, costo},
                     (a, b) -> new BigDecimal[]{a[0].add(b[0]), a[1].add(b[1])});
@@ -141,6 +163,24 @@ public class InformesServiceImpl implements InformesService {
 
         dto.setTopVinos(topVinos);
         return dto;
+    }
+
+    /**
+     * Devuelve la cantidad real de botellas de un detalle.
+     * Si la lista de precio es por caja/mayorista/bulto, multiplica por cantVinosxcaja
+     * (misma lógica que entregarVenta para el descuento de stock).
+     */
+    private int resolverBotellas(VentaDetalle d) {
+        int cant = d.getCantidad() != null ? d.getCantidad() : 0;
+        if (d.getListaPrecio() != null) {
+            String nombre = d.getListaPrecio().getNombre().toLowerCase();
+            if (nombre.contains("caja") || nombre.contains("mayorista") || nombre.contains("bulto")) {
+                int porCaja = (d.getVino() != null && d.getVino().getCantVinosxcaja() != null)
+                        ? d.getVino().getCantVinosxcaja() : 1;
+                return cant * porCaja;
+            }
+        }
+        return cant;
     }
 
     @Override

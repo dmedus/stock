@@ -28,7 +28,6 @@
                             <th>Lista Precio</th>
 							<th>Cantidad</th>
 							<th>Precio Unitario</th>
-							<th>Precio Caja</th>
 							<th>Subtotal</th>
 						</tr>
 					</thead>
@@ -45,7 +44,6 @@
                             </td>
 							<td th:text="${detalle.cantidad}"></td>
 							<td th:text="${#numbers.formatCurrency(detalle.precioUnitario)}"></td>
-							<td th:text="${#numbers.formatCurrency(detalle.precioCaja)}"></td>
 							<td th:text="${#numbers.formatCurrency(detalle.subtotal)}"></td>
 						</tr>
 					</tbody>

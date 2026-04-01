@@ -38,7 +38,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.stock.entidades.Pago;
 import com.stock.repositorio.ComboRepository;
+import com.stock.repositorio.PagoRepository;
 import com.stock.entidades.Combo;
 import java.util.HashMap;
 
@@ -47,6 +49,9 @@ public class VentaControlador {
 
     @Autowired
     private ComboRepository comboRepository;
+
+    @Autowired
+    private PagoRepository pagoRepository;
 
     @Autowired
     private ClientesService clientesService;
@@ -471,13 +476,26 @@ public class VentaControlador {
             return "redirect:/listarVentas";
         }
 
+        if (!Boolean.TRUE.equals(venta.getActivo())) {
+            flash.addFlashAttribute("error", "Esta venta ya fue completada y no admite más pagos.");
+            return "redirect:/listarVentas";
+        }
+
         venta.setPagado(venta.getPagado().add(monto));
 
         if (venta.getPagado().compareTo(venta.getTotal()) >= 0) {
-            venta.setActivo(false); // O alguna lógica para marcarla como completada
+            venta.setActivo(false);
         }
 
         ventaService.save(venta);
+
+        Pago pago = new Pago();
+        pago.setVenta(venta);
+        pago.setMonto(monto);
+        pago.setMetodoPago(metodoPago);
+        pago.setFecha(LocalDate.now());
+        pagoRepository.save(pago);
+
         flash.addFlashAttribute("success", "Pago registrado con éxito");
         return "redirect:/listarVentas";
     }
