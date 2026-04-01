@@ -112,6 +112,18 @@ public class InformesServiceImpl implements InformesService {
                 .sum();
         dto.setTotalBotellas(totalBotellas);
 
+        // DEBUG: imprimir todos los vinos en detallesVino
+        System.out.println("=== DEBUG INFORME mes=" + mes + " anio=" + anio + " | detallesVino.size=" + detallesVino.size() + " | ventasRealizadas.size=" + ventasRealizadas.size() + " ===");
+        for (VentaDetalle d : detallesVino) {
+            int bots2 = resolverBotellas(d);
+            BigDecimal pu2 = d.getPrecioUnitario() != null ? d.getPrecioUnitario() : BigDecimal.ZERO;
+            System.out.printf("  [TODOS] ventaId=%d | vino=%-30s | cant=%d botellas=%d | precioUnit=%s | subtotalGuardado=%s%n",
+                    d.getVenta().getId(),
+                    d.getVino().getNombre(),
+                    d.getCantidad() != null ? d.getCantidad() : 0,
+                    bots2, pu2,
+                    d.getSubtotal());
+        }
         // DEBUG: imprimir detalles de El Enemigo Malbec
         System.out.println("=== DEBUG El Enemigo Malbec ===");
         for (VentaDetalle d : detallesVino) {
