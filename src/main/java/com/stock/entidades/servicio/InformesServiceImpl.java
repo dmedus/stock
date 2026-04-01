@@ -51,20 +51,20 @@ public class InformesServiceImpl implements InformesService {
                 .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Cobrado desde tabla Pago (registra método y fecha real del cobro)
-        List<Pago> pagos = pagoRepository.findByFechaBetween(inicio, fin);
-        BigDecimal totalCobrado = pagos.stream()
-                .map(Pago::getMonto)
+        // Total cobrado desde venta.pagado (tiene datos históricos y actuales)
+        BigDecimal totalCobrado = ventas.stream()
+                .map(v -> v.getPagado() != null ? v.getPagado() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Desglose por método desde tabla Pago (cubre pagos registrados con el nuevo sistema)
+        List<Pago> pagos = pagoRepository.findByFechaBetween(inicio, fin);
         BigDecimal cobradoEfectivo = pagos.stream()
                 .filter(p -> "Efectivo".equalsIgnoreCase(p.getMetodoPago()))
                 .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal cobradoTransferencia = pagos.stream()
                 .filter(p -> "Transferencia".equalsIgnoreCase(p.getMetodoPago()))
                 .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal cobradoTarjeta = pagos.stream()
-                .filter(p -> "Tarjeta".equalsIgnoreCase(p.getMetodoPago()))
-                .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal cobradoTarjeta = BigDecimal.ZERO;
 
         // Ventas realizadas = entregadas Y pagadas (activo=false)
         long cantidadVentas   = ventas.stream()
