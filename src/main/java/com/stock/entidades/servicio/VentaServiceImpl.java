@@ -95,11 +95,10 @@ public class VentaServiceImpl implements VentaService {
         for (VentaDetalle detalle : venta.getDetalles()) {
             if (detalle.getVino() != null) {
                 int cantidadADescontar = detalle.getCantidad();
-                if (detalle.getListaPrecio() != null) {
-                    String nombreLista = detalle.getListaPrecio().getNombre().toLowerCase();
-                    if (nombreLista.contains("caja") || nombreLista.contains("mayorista") || nombreLista.contains("bulto")) {
-                        cantidadADescontar = detalle.getCantidad() * detalle.getVino().getCantVinosxcaja();
-                    }
+                if (!Boolean.TRUE.equals(detalle.getPromoSeis())
+                        && detalle.getListaPrecio() != null
+                        && Boolean.TRUE.equals(detalle.getListaPrecio().getEsPorCaja())) {
+                    cantidadADescontar = detalle.getCantidad() * detalle.getVino().getCantVinosxcaja();
                 }
                 stockService.discountStock(detalle.getVino(), cantidadADescontar);
             } else if (detalle.getCombo() != null) {
