@@ -292,11 +292,15 @@ public class InformesServiceImpl implements InformesService {
      */
     private int resolverBotellas(VentaDetalle d) {
         int cant = d.getCantidad() != null ? d.getCantidad() : 0;
-        if (d.getListaPrecio() != null && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja())) {
-            // promoSeis = precio de caja aplicado a botellas sueltas → cant ya está en botellas
-            if (Boolean.TRUE.equals(d.getPromoSeis())) {
-                return cant;
-            }
+        // promoSeis = botella suelta con descuento de caja → cant ya es botellas
+        if (Boolean.TRUE.equals(d.getPromoSeis())) {
+            return cant;
+        }
+        // Solo multiplicar por cantVinosxcaja cuando la lista es por caja
+        // y el detalle es explícitamente NO promoSeis (false, nunca null)
+        if (d.getListaPrecio() != null
+                && Boolean.TRUE.equals(d.getListaPrecio().getEsPorCaja())
+                && Boolean.FALSE.equals(d.getPromoSeis())) {
             int porCaja = (d.getVino() != null && d.getVino().getCantVinosxcaja() != null)
                     ? d.getVino().getCantVinosxcaja() : 1;
             return cant * porCaja;
