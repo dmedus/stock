@@ -72,9 +72,9 @@ public class InformesServiceImpl implements InformesService {
                 .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal cobradoTarjeta = BigDecimal.ZERO;
 
-        // Ventas realizadas = entregadas Y pagadas (activo=false)
+        // Ventas realizadas = entregadas Y pagadas (activo=false explícito; null se trata como no pagada)
         long cantidadVentas   = ventas.stream()
-                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
+                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && Boolean.FALSE.equals(v.getActivo()))
                 .count();
         long ventasEntregadas = ventas.stream().filter(v -> Boolean.TRUE.equals(v.getEntregado())).count();
         long clientesUnicos    = ventas.stream()
@@ -98,7 +98,7 @@ public class InformesServiceImpl implements InformesService {
 
         // ---- Ventas realizadas (entregadas y pagadas) ----
         List<Venta> ventasRealizadas = ventas.stream()
-                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && !Boolean.TRUE.equals(v.getActivo()))
+                .filter(v -> Boolean.TRUE.equals(v.getEntregado()) && Boolean.FALSE.equals(v.getActivo()))
                 .collect(Collectors.toList());
 
         // Detalles de vinos de ventas realizadas
@@ -144,10 +144,13 @@ public class InformesServiceImpl implements InformesService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // ---- Rentabilidad ----
-        // costoCompra/costoFlete están cargados por CAJA. Dividimos por cantVinosxcaja
-        // para obtener el costo por botella y luego multiplicamos por las botellas reales.
         BigDecimal costoTotal = detallesVino.stream()
-                .map(d -> costoPorBotellas(d, resolverBotellas(d)))
+                .map(d -> {
+                    int botellas = resolverBotellas(d);
+                    BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
+                    BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
+                    return cc.add(cf).multiply(BigDecimal.valueOf(botellas));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal gananciaBruta = ingresoRealizadas.subtract(costoTotal);
@@ -178,7 +181,9 @@ public class InformesServiceImpl implements InformesService {
                     : (d.getPrecioUnitario() != null && d.getCantidad() != null
                             ? d.getPrecioUnitario().multiply(BigDecimal.valueOf(d.getCantidad()))
                             : BigDecimal.ZERO);
-            BigDecimal costo = costoPorBotellas(d, botellas);
+            BigDecimal cc  = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
+            BigDecimal cf  = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
+            BigDecimal costo = cc.add(cf).multiply(BigDecimal.valueOf(botellas));
 
             nombreMap.putIfAbsent(vinoId, d.getVino().getNombre());
             botellasMap.merge(vinoId, new long[]{botellas}, (a, b) -> new long[]{a[0] + b[0]});
@@ -252,7 +257,12 @@ public class InformesServiceImpl implements InformesService {
         u.setBotellas(botellas);
 
         BigDecimal costo = detalles.stream()
-                .map(d -> costoPorBotellas(d, resolverBotellas(d)))
+                .map(d -> {
+                    int bots = resolverBotellas(d);
+                    BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
+                    BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
+                    return cc.add(cf).multiply(BigDecimal.valueOf(bots));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         u.setCosto(costo);
 
@@ -274,20 +284,6 @@ public class InformesServiceImpl implements InformesService {
         }
 
         return u;
-    }
-
-    /**
-     * Costo total para un detalle dado un número de botellas.
-     * costoCompra y costoFlete están cargados por CAJA; se dividen por cantVinosxcaja
-     * para obtener el costo real por botella.
-     */
-    private BigDecimal costoPorBotellas(VentaDetalle d, int botellas) {
-        BigDecimal cc = d.getVino().getCostoCompra() != null ? d.getVino().getCostoCompra() : BigDecimal.ZERO;
-        BigDecimal cf = d.getVino().getCostoFlete()  != null ? d.getVino().getCostoFlete()  : BigDecimal.ZERO;
-        int porCaja = (d.getVino().getCantVinosxcaja() != null && d.getVino().getCantVinosxcaja() > 0)
-                ? d.getVino().getCantVinosxcaja() : 1;
-        BigDecimal costoPorBotella = cc.add(cf).divide(BigDecimal.valueOf(porCaja), 4, RoundingMode.HALF_UP);
-        return costoPorBotella.multiply(BigDecimal.valueOf(botellas));
     }
 
     /**
