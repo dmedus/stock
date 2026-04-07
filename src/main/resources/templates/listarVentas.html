@@ -21,6 +21,7 @@
 				<div class="card mb-4 shadow-sm border-info">
 					<div class="card-body bg-light py-3">
 						<form th:action="@{/listarVentas}" method="get" class="row align-items-end">
+							<input type="hidden" name="submitted" value="true">
 							<div class="col-md-3 mb-2 mb-md-0">
 								<label for="clienteSearch" class="font-weight-bold text-secondary">Cliente:</label>
 								<input type="text" name="cliente" id="clienteSearch" class="form-control border-info" placeholder="Nombre o apellido..." th:value="${cliente}">

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class MovimientoStockControlador {
@@ -64,5 +65,46 @@ public class MovimientoStockControlador {
             flash.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/movimientoStock";
+    }
+
+    @GetMapping("/ajusteStockMasivo")
+    public String mostrarAjusteMasivo(Model model) {
+        List<Vino> vinos = vinoService.findAll();
+        Map<Long, Integer> stockMap = stockService.getStockTotalMap();
+        model.addAttribute("vinos", vinos);
+        model.addAttribute("stockMap", stockMap);
+        model.addAttribute("titulo", "Ajuste Masivo de Stock");
+        return "ajusteStockMasivo";
+    }
+
+    @PostMapping("/ajusteStockMasivo")
+    public String guardarAjusteMasivo(@RequestParam Map<String, String> params, RedirectAttributes flash) {
+        int actualizados = 0;
+        StringBuilder errores = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (!entry.getKey().startsWith("stock_")) continue;
+            try {
+                Long vinoId = Long.parseLong(entry.getKey().replace("stock_", ""));
+                Integer nuevaCantidad = Integer.parseInt(entry.getValue());
+                if (nuevaCantidad < 0) continue;
+                Vino vino = vinoService.findById(vinoId);
+                if (vino != null) {
+                    stockService.ajustarStock(vino, nuevaCantidad);
+                    actualizados++;
+                }
+            } catch (NumberFormatException e) {
+                // campo vacío o inválido, se ignora
+            } catch (RuntimeException e) {
+                errores.append(e.getMessage()).append(" ");
+            }
+        }
+
+        if (errores.length() > 0) {
+            flash.addFlashAttribute("error", errores.toString());
+        } else {
+            flash.addFlashAttribute("success", "Stock actualizado para " + actualizados + " vinos.");
+        }
+        return "redirect:/ajusteStockMasivo";
     }
 }

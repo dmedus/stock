@@ -421,15 +421,16 @@ public class VentaControlador {
                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
                                @RequestParam(required = false) String cliente,
                                @RequestParam(required = false) Boolean activo,
+                               @RequestParam(required = false) Boolean submitted,
                                Model model) {
-        
+
         List<Venta> ventas;
-        
-        // Si se realiza una búsqueda (al menos un parámetro está presente)
-        if (fechaInicio != null || fechaFin != null || (cliente != null && !cliente.isEmpty()) || activo != null) {
+
+        if (Boolean.TRUE.equals(submitted)) {
+            // El usuario envió el formulario: usar los filtros (activo=null significa "Todos")
             ventas = ventaService.searchVentas(fechaInicio, fechaFin, cliente, activo);
         } else {
-            // Por defecto solo mostramos las activas
+            // Carga inicial: mostrar solo activas
             ventas = ventaService.findByActivoTrue();
         }
 

@@ -15,4 +15,5 @@ public interface StockService {
     public Map<Long, Integer> getStockTotalMap();
     public void discountStock(Vino vino, Integer cantidad);
     public void moverStock(Vino vino, Deposito origen, Deposito destino, Integer cantidad);
+    public void ajustarStock(Vino vino, Integer nuevaCantidad);
 }

@@ -79,6 +79,24 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional
+    public void ajustarStock(Vino vino, Integer nuevaCantidad) {
+        List<Stock> stocks = stockRepository.findByVino(vino);
+        if (stocks.isEmpty()) {
+            // Si no existe ningún registro de stock para este vino, hay que crear uno
+            // pero necesitamos un depósito — usamos el único existente
+            throw new RuntimeException("No existe registro de stock para el vino: " + vino.getNombre() + ". Agregalo desde Movimiento de Stock primero.");
+        }
+        // Concentrar todo el stock en el primer registro y poner los demás en 0
+        stocks.get(0).setCantidad(nuevaCantidad);
+        stockRepository.save(stocks.get(0));
+        for (int i = 1; i < stocks.size(); i++) {
+            stocks.get(i).setCantidad(0);
+            stockRepository.save(stocks.get(i));
+        }
+    }
+
+    @Override
+    @Transactional
     public void discountStock(Vino vino, Integer cantidad) {
         List<Stock> stocks = stockRepository.findByVinoForUpdate(vino);
         Integer stockTotal = stocks.stream().mapToInt(Stock::getCantidad).sum();
