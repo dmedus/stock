@@ -68,8 +68,8 @@
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Precio</th>
-                                <th>Cant Cajas</th>
+                                <th>Precio por Caja</th>
+                                <th>Cant. Cajas</th>
                                 <th>Total</th>
                                 <th>Eliminar</th>
                             </tr>
@@ -78,7 +78,7 @@
                             <!-- Items will be added here -->
     <tr class="item_row" th:each="detalle : *{detalles}">
         <td><input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> <span th:text="${detalle.vino.nombre}"></span></td>
-        <td><input type="number" name="precio[]" th:value="${detalle.precioUnitario}" class="form-control item_precio" style="width: 100px;"/></td>
+        <td><input type="number" name="precio[]" th:value="${detalle.precioCaja}" class="form-control item_precio" style="width: 100px;"/></td>
         <td><input type="number" name="cantidad[]" th:value="${detalle.cantidad / detalle.vino.cantVinosxcaja}" class="form-control cantidad" style="width: 60px;" /></td>
         <td class="total_item" th:text="${#numbers.formatDecimal(detalle.subtotal, 0, 'POINT', 0, 'COMMA')}"></td>
         <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
@@ -87,7 +87,13 @@
                         </tbody>
                     </table>
 
-                    <h5>Total: <span id="total_pedido">0.00</span></h5>
+                    <div class="d-flex justify-content-end mt-2 mb-3">
+                        <div class="card bg-dark text-white px-4 py-2">
+                            <span class="font-weight-bold" style="font-size: 1.2rem;">
+                                Total: <span id="total_pedido" style="min-width: 150px; display: inline-block; text-align: right;">0</span>
+                            </span>
+                        </div>
+                    </div>
 
 	                 <div class="box-footer"> 
 	                     <input type="submit" value="Guardar Pedido" class="btn btn-primary">
@@ -159,12 +165,10 @@
 
             $("#items_pedido").on("change", ".cantidad, .item_precio", function() {
                 let row = $(this).closest("tr");
-                let cantidadCajas = row.find(".cantidad").val(); // Number of boxes
-                let precioPorBotella = parseFloat(row.find(".item_precio").val()); // Price per bottle
-                let cantVinosxcaja = parseFloat(row.find(".cant_vinos_x_caja").val()); // Bottles per box
+                let cantidadCajas = parseFloat(row.find(".cantidad").val()) || 0;
+                let precioPorCaja = parseFloat(row.find(".item_precio").val()) || 0;
 
-                let precioPorCaja = precioPorBotella * cantVinosxcaja;
-                let totalItem = precioPorCaja * cantidadCajas; // Total = (price per bottle * bottles per box) * number of boxes
+                let totalItem = precioPorCaja * cantidadCajas;
 
                 row.find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}));
                 calcularTotal();

@@ -92,16 +92,21 @@ public class PedidoControlador {
         for (int i = 0; i < itemIds.length; i++) {
             Vino vino = vinoService.findById(itemIds[i]);
             if (vino != null) {
+                BigDecimal precioPorCaja = precios[i];
+                BigDecimal precioUnitario = precioPorCaja.divide(
+                        new BigDecimal(vino.getCantVinosxcaja()), 2, java.math.RoundingMode.HALF_UP);
+                int totalBotellas = cantidades[i] * vino.getCantVinosxcaja();
+                BigDecimal subtotal = precioPorCaja.multiply(new BigDecimal(cantidades[i]));
+
                 PedidoDetalle detalle = new PedidoDetalle();
                 detalle.setVino(vino);
-                detalle.setPrecioUnitario(precios[i]);
-                BigDecimal precioCajaCalculado = precios[i].multiply(new BigDecimal(vino.getCantVinosxcaja()));
-                detalle.setPrecioCaja(precioCajaCalculado);
-                detalle.setCantidad(cantidades[i] * vino.getCantVinosxcaja()); // Total bottles = boxes * bottles_per_box
-                detalle.setSubtotal(precioCajaCalculado.multiply(new BigDecimal(cantidades[i]))); // Subtotal = price_per_box * number_of_boxes
+                detalle.setPrecioUnitario(precioUnitario);
+                detalle.setPrecioCaja(precioPorCaja);
+                detalle.setCantidad(totalBotellas);
+                detalle.setSubtotal(subtotal);
                 detalle.setPedido(pedidoAGuardar);
                 pedidoAGuardar.getDetalles().add(detalle);
-                total = total.add(detalle.getSubtotal());
+                total = total.add(subtotal);
             }
         }
         pedidoAGuardar.setTotal(total);
