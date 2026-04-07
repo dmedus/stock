@@ -98,8 +98,16 @@ public class VinoControlador {
     @PostMapping("/eliminarVino/{id}")
     public String eliminarVino(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
         if (id > 0) {
-            vinoService.deleteById(id);
-            flash.addFlashAttribute("success", "Vino eliminado con éxito");
+            try {
+                boolean eliminado = vinoService.eliminarODesactivar(id);
+                if (eliminado) {
+                    flash.addFlashAttribute("success", "Vino eliminado con éxito.");
+                } else {
+                    flash.addFlashAttribute("warning", "El vino tiene ventas o pedidos asociados y no puede eliminarse. Fue desactivado en su lugar.");
+                }
+            } catch (RuntimeException e) {
+                flash.addFlashAttribute("error", "No se pudo eliminar el vino: " + e.getMessage());
+            }
         }
         return "redirect:/listarVinos";
     }

@@ -12,4 +12,10 @@ public interface VinoService {
     public long countAll();
     public List<Vino> findTop5ByOrderByStockActualAsc();
     public List<Vino> findVinosBelowMinStock();
+    /**
+     * Elimina el vino si no tiene historial de ventas ni pedidos.
+     * Si tiene historial, lo desactiva (activo=false).
+     * @return true si fue eliminado, false si fue desactivado.
+     */
+    public boolean eliminarODesactivar(Long id);
 }

@@ -3,6 +3,10 @@ package com.stock.entidades.servicio;
 import com.stock.entidades.Deposito;
 import com.stock.entidades.Stock;
 import com.stock.entidades.Vino;
+import com.stock.repositorio.PedidoDetalleRepository;
+import com.stock.repositorio.PrecioVinoRepository;
+import com.stock.repositorio.StockRepository;
+import com.stock.repositorio.VentaDetalleRepository;
 import com.stock.repositorio.VinoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +20,13 @@ import java.util.regex.Pattern;
 @Service
 public class VinoServiceImpl implements VinoService {
 
-    @Autowired
-    private VinoRepository vinoRepository;
-
-    @Autowired
-    private StockService stockService;
-
-    @Autowired
-    private DepositoService depositoService;
+    @Autowired private VinoRepository vinoRepository;
+    @Autowired private StockService stockService;
+    @Autowired private DepositoService depositoService;
+    @Autowired private StockRepository stockRepository;
+    @Autowired private PrecioVinoRepository precioVinoRepository;
+    @Autowired private VentaDetalleRepository ventaDetalleRepository;
+    @Autowired private PedidoDetalleRepository pedidoDetalleRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -101,6 +104,28 @@ public class VinoServiceImpl implements VinoService {
         Map<Long, Integer> stockMap = stockService.getStockTotalMap();
         vinos.forEach(vino -> vino.setStockActual(stockMap.getOrDefault(vino.getId(), 0)));
         return vinos;
+    }
+
+    @Override
+    @Transactional
+    public boolean eliminarODesactivar(Long id) {
+        Vino vino = vinoRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Vino no encontrado con id: " + id));
+
+        boolean tieneHistorial = ventaDetalleRepository.existsByVino(vino)
+                || pedidoDetalleRepository.existsByVino(vino);
+
+        if (tieneHistorial) {
+            vino.setActivo(false);
+            vinoRepository.save(vino);
+            return false; // desactivado
+        }
+
+        // Sin historial: eliminar registros relacionados y luego el vino
+        stockRepository.deleteAll(stockRepository.findByVino(vino));
+        precioVinoRepository.deleteAll(precioVinoRepository.findByVino(vino));
+        vinoRepository.delete(vino);
+        return true; // eliminado
     }
 
     @Override

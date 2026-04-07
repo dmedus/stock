@@ -8,6 +8,11 @@ import java.util.List;
 
 public interface VentaService {
 
+    void procesarVenta(Long id, Long clienteId,
+                       Long[] itemIds, Integer[] cantidades, Long[] listaPrecioItemIds,
+                       Long[] comboIds, Integer[] comboCantidades,
+                       LocalDate fecha, String usuarioNombre);
+
     public List<Venta> findAll();
 
     public List<Venta> findByActivoTrue();

@@ -3,6 +3,7 @@ package com.stock.entidades.servicio;
 import com.stock.entidades.Deposito;
 import com.stock.entidades.Stock;
 import com.stock.entidades.Vino;
+import com.stock.repositorio.DepositoRepository;
 import com.stock.repositorio.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ public class StockServiceImpl implements StockService {
 
     @Autowired
     private StockRepository stockRepository;
+
+    @Autowired
+    private DepositoRepository depositoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -82,16 +86,21 @@ public class StockServiceImpl implements StockService {
     public void ajustarStock(Vino vino, Integer nuevaCantidad) {
         List<Stock> stocks = stockRepository.findByVino(vino);
         if (stocks.isEmpty()) {
-            // Si no existe ningún registro de stock para este vino, hay que crear uno
-            // pero necesitamos un depósito — usamos el único existente
-            throw new RuntimeException("No existe registro de stock para el vino: " + vino.getNombre() + ". Agregalo desde Movimiento de Stock primero.");
-        }
-        // Concentrar todo el stock en el primer registro y poner los demás en 0
-        stocks.get(0).setCantidad(nuevaCantidad);
-        stockRepository.save(stocks.get(0));
-        for (int i = 1; i < stocks.size(); i++) {
-            stocks.get(i).setCantidad(0);
-            stockRepository.save(stocks.get(i));
+            Deposito deposito = depositoRepository.findAll().stream().findFirst().orElseThrow(
+                () -> new RuntimeException("No hay depósitos configurados en el sistema.")
+            );
+            Stock nuevo = new Stock();
+            nuevo.setVino(vino);
+            nuevo.setDeposito(deposito);
+            nuevo.setCantidad(nuevaCantidad);
+            stockRepository.save(nuevo);
+        } else {
+            stocks.get(0).setCantidad(nuevaCantidad);
+            stockRepository.save(stocks.get(0));
+            for (int i = 1; i < stocks.size(); i++) {
+                stocks.get(i).setCantidad(0);
+                stockRepository.save(stocks.get(i));
+            }
         }
     }
 
