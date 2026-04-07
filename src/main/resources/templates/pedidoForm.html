@@ -68,8 +68,8 @@
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Precio por Caja</th>
-                                <th>Cant. Cajas</th>
+                                <th>Precio por Botella</th>
+                                <th>Cant. Botellas</th>
                                 <th>Total</th>
                                 <th>Eliminar</th>
                             </tr>
@@ -78,8 +78,8 @@
                             <!-- Items will be added here -->
     <tr class="item_row" th:each="detalle : *{detalles}">
         <td><input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> <span th:text="${detalle.vino.nombre}"></span></td>
-        <td><input type="number" name="precio[]" th:value="${detalle.precioCaja}" class="form-control item_precio" style="width: 100px;"/></td>
-        <td><input type="number" name="cantidad[]" th:value="${detalle.cantidad / detalle.vino.cantVinosxcaja}" class="form-control cantidad" style="width: 60px;" /></td>
+        <td><input type="number" name="precio[]" th:value="${detalle.precioUnitario}" class="form-control item_precio" style="width: 100px;"/></td>
+        <td><input type="number" name="cantidad[]" th:value="${detalle.cantidad}" class="form-control cantidad" style="width: 60px;" /></td>
         <td class="total_item" th:text="${#numbers.formatDecimal(detalle.subtotal, 0, 'POINT', 0, 'COMMA')}"></td>
         <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
         <input type="hidden" class="cant_vinos_x_caja" th:value="${detalle.vino.cantVinosxcaja}"/>
@@ -165,10 +165,10 @@
 
             $("#items_pedido").on("change", ".cantidad, .item_precio", function() {
                 let row = $(this).closest("tr");
-                let cantidadCajas = parseFloat(row.find(".cantidad").val()) || 0;
-                let precioPorCaja = parseFloat(row.find(".item_precio").val()) || 0;
+                let cantBotellas = parseFloat(row.find(".cantidad").val()) || 0;
+                let precioPorBotella = parseFloat(row.find(".item_precio").val()) || 0;
 
-                let totalItem = precioPorCaja * cantidadCajas;
+                let totalItem = precioPorBotella * cantBotellas;
 
                 row.find(".total_item").text(totalItem.toLocaleString('es-AR', {minimumFractionDigits: 0, maximumFractionDigits: 0}));
                 calcularTotal();
