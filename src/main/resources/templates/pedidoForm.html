@@ -78,7 +78,7 @@
                             <!-- Items will be added here -->
     <tr class="item_row" th:each="detalle : *{detalles}">
         <td><input type="hidden" name="item_id[]" th:value="${detalle.vino.id}" /> <span th:text="${detalle.vino.nombre}"></span></td>
-        <td><input type="number" name="precio[]" th:value="${detalle.precioUnitario}" class="form-control item_precio" style="width: 100px;"/></td>
+        <td><input type="number" name="precio[]" th:value="${detalle.precioUnitario}" step="0.01" class="form-control item_precio" style="width: 100px;"/></td>
         <td><input type="number" name="cantidad[]" th:value="${detalle.cantidad}" class="form-control cantidad" style="width: 60px;" /></td>
         <td class="total_item" th:text="${#numbers.formatDecimal(detalle.subtotal, 0, 'POINT', 0, 'COMMA')}"></td>
         <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>
@@ -193,7 +193,7 @@
     <script type="text/template" id="plantillaItemsPedido">
         <tr class="item_row">
             <td><input type="hidden" name="item_id[]" value="{ID}">{NOMBRE}</td>
-            <td><input type="number" name="precio[]" value="{PRECIO}" class="form-control item_precio" style="width: 100px;"/></td>
+            <td><input type="number" name="precio[]" value="{PRECIO}" step="0.01" class="form-control item_precio" style="width: 100px;"/></td>
             <td><input type="number" name="cantidad[]" value="1" class="form-control cantidad" style="width: 60px;"/></td>
             <td class="total_item">0</td>
             <td><a href="#" class="btn btn-danger btn-sm" onclick="eliminarItem(this)">X</a></td>

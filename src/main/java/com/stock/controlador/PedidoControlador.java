@@ -48,6 +48,7 @@ public class PedidoControlador {
     @GetMapping("/pedidoForm")
     public String crearPedido(Map<String, Object> model) {
         Pedido pedido = new Pedido();
+        pedido.setFecha(java.time.LocalDate.now());
         model.put("pedido", pedido);
         model.put("titulo", "Formulario de Pedido");
         model.put("depositos", depositoService.findAll());
@@ -60,6 +61,10 @@ public class PedidoControlador {
                                 @RequestParam(name = "precio[]", required = false) BigDecimal[] precios,
                                 @RequestParam(name = "cantidad[]", required = false) Integer[] cantidades,
                                 RedirectAttributes flash, SessionStatus status) {
+        if (pedido.getFecha() == null) {
+            pedido.setFecha(java.time.LocalDate.now());
+        }
+
         if (result.hasErrors()) {
             model.addAttribute("titulo", "Formulario de Pedido");
             return "pedidoForm";
