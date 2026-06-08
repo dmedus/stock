@@ -7,7 +7,9 @@ import com.stock.entidades.ListaPrecio;
 import com.stock.entidades.Vino;
 import com.stock.entidades.servicio.ListaPrecioService;
 import com.stock.entidades.servicio.PrecioVinoService;
+import com.stock.entidades.servicio.UsuarioService;
 import com.stock.entidades.servicio.VinoService;
+import com.stock.entidades.Usuario;
 import com.stock.repositorio.ComboRepository;
 import com.stock.repositorio.PagoRepository;
 import com.stock.entidades.Combo;
@@ -29,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class VentaControlador {
@@ -40,6 +43,7 @@ public class VentaControlador {
     @Autowired private PrecioVinoService precioVinoService;
     @Autowired private ComboRepository comboRepository;
     @Autowired private PagoRepository pagoRepository;
+    @Autowired private UsuarioService usuarioService;
 
     // --- Formulario de venta ---
 
@@ -139,12 +143,17 @@ public class VentaControlador {
                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
                                @RequestParam(required = false) String cliente,
                                @RequestParam(required = false) Boolean activo,
+                               @RequestParam(required = false) Long usuarioId,
                                @RequestParam(required = false) Boolean submitted,
                                Model model) {
 
         List<Venta> ventas = Boolean.TRUE.equals(submitted)
-                ? ventaService.searchVentas(fechaInicio, fechaFin, cliente, activo)
+                ? ventaService.searchVentas(fechaInicio, fechaFin, cliente, activo, usuarioId)
                 : ventaService.findByActivoTrue();
+
+        List<Usuario> vendedores = usuarioService.listarUsuarios().stream()
+                .filter(u -> Boolean.TRUE.equals(u.getActivo()))
+                .collect(Collectors.toList());
 
         model.addAttribute("titulo", "Listado de Ventas");
         model.addAttribute("ventas", ventas);
@@ -152,6 +161,8 @@ public class VentaControlador {
         model.addAttribute("fechaFin", fechaFin);
         model.addAttribute("cliente", cliente);
         model.addAttribute("activo", activo);
+        model.addAttribute("usuarioId", usuarioId);
+        model.addAttribute("vendedores", vendedores);
         return "listarVentas";
     }
 

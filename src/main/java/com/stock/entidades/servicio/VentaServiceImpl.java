@@ -51,8 +51,8 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Venta> searchVentas(LocalDate fechaInicio, LocalDate fechaFin, String clienteNombre, Boolean activo) {
-        return ventaRepository.searchVentas(fechaInicio, fechaFin, clienteNombre, activo);
+    public List<Venta> searchVentas(LocalDate fechaInicio, LocalDate fechaFin, String clienteNombre, Boolean activo, Long usuarioId) {
+        return ventaRepository.searchVentas(fechaInicio, fechaFin, clienteNombre, activo, usuarioId);
     }
 
     @Override

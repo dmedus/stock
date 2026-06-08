@@ -25,8 +25,9 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
            "(:fechaInicio IS NULL OR v.fecha >= :fechaInicio) AND " +
            "(:fechaFin IS NULL OR v.fecha <= :fechaFin) AND " +
            "(:clienteNombre IS NULL OR LOWER(v.cliente.nombre) LIKE LOWER(CONCAT('%', :clienteNombre, '%')) OR LOWER(v.cliente.apellido) LIKE LOWER(CONCAT('%', :clienteNombre, '%'))) AND " +
-           "(:activo IS NULL OR v.activo = :activo)")
-    List<Venta> searchVentas(@Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin, @Param("clienteNombre") String clienteNombre, @Param("activo") Boolean activo);
+           "(:activo IS NULL OR v.activo = :activo) AND " +
+           "(:usuarioId IS NULL OR v.usuario.id = :usuarioId)")
+    List<Venta> searchVentas(@Param("fechaInicio") LocalDate fechaInicio, @Param("fechaFin") LocalDate fechaFin, @Param("clienteNombre") String clienteNombre, @Param("activo") Boolean activo, @Param("usuarioId") Long usuarioId);
 
     /**
      * Resumen de ventas del mes: [totalIngresos, totalCobrado, cantidadVentas, clientesUnicos]

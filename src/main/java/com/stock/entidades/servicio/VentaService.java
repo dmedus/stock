@@ -17,7 +17,7 @@ public interface VentaService {
 
     public List<Venta> findByActivoTrue();
 
-    public List<Venta> searchVentas(LocalDate fechaInicio, LocalDate fechaFin, String clienteNombre, Boolean activo);
+    public List<Venta> searchVentas(LocalDate fechaInicio, LocalDate fechaFin, String clienteNombre, Boolean activo, Long usuarioId);
 
     public Venta findById(Long id);
 

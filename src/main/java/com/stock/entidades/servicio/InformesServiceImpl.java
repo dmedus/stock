@@ -51,7 +51,7 @@ public class InformesServiceImpl implements InformesService {
         LocalDate fin    = inicio.withDayOfMonth(inicio.lengthOfMonth());
 
         // Cargar TODAS las ventas del mes (activas y completadas)
-        List<Venta> ventas = ventaRepository.searchVentas(inicio, fin, null, null);
+        List<Venta> ventas = ventaRepository.searchVentas(inicio, fin, null, null, null);
         ventas.forEach(v -> v.getDetalles().size()); // forzar lazy load
 
         InformesMesDTO dto = new InformesMesDTO();
