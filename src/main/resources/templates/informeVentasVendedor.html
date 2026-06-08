@@ -118,11 +118,11 @@
                             <tbody>
                                 <tr th:each="venta : ${informeVendedor.ventas}">
                                     <td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="${venta.cliente != null} ? (${venta.cliente.nombre} + ' ' + ${venta.cliente.apellido}) : '—'"></td>
-                                    <td th:text="${venta.listaPrecio != null} ? ${venta.listaPrecio.nombre} : 'Sin tipo asignado'"></td>
+                                    <td th:text="${venta.cliente}"></td>
+                                    <td th:text="${venta.tipoVenta}"></td>
                                     <td class="text-right" th:text="${#numbers.formatCurrency(venta.total)}"></td>
                                     <td class="text-right">
-                                        <a th:href="@{'/verVentaDetalles/' + ${venta.id}}" class="btn btn-sm btn-outline-info">Ver</a>
+                                        <a th:href="@{'/verVentaDetalles/' + ${venta.ventaId}}" class="btn btn-sm btn-outline-info">Ver</a>
                                     </td>
                                 </tr>
                             </tbody>

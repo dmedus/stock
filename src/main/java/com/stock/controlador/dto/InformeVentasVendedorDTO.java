@@ -1,7 +1,5 @@
 package com.stock.controlador.dto;
 
-import com.stock.entidades.Venta;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -13,7 +11,7 @@ public class InformeVentasVendedorDTO {
     private Long usuarioId;
     private String usuarioNombre;
 
-    private List<Venta> ventas;
+    private List<VentaResumenVendedorDTO> ventas;
     private List<ResumenTipoVentaDTO> resumenPorTipo;
     private BigDecimal totalGeneral;
 
@@ -32,8 +30,8 @@ public class InformeVentasVendedorDTO {
     public String getUsuarioNombre() { return usuarioNombre; }
     public void setUsuarioNombre(String usuarioNombre) { this.usuarioNombre = usuarioNombre; }
 
-    public List<Venta> getVentas() { return ventas; }
-    public void setVentas(List<Venta> ventas) { this.ventas = ventas; }
+    public List<VentaResumenVendedorDTO> getVentas() { return ventas; }
+    public void setVentas(List<VentaResumenVendedorDTO> ventas) { this.ventas = ventas; }
 
     public List<ResumenTipoVentaDTO> getResumenPorTipo() { return resumenPorTipo; }
     public void setResumenPorTipo(List<ResumenTipoVentaDTO> resumenPorTipo) { this.resumenPorTipo = resumenPorTipo; }

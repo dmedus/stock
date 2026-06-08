@@ -49,9 +49,12 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     List<Object> findAniosConVentas();
 
     /**
-     * Ventas activas de un usuario en un mes/año determinado, para el informe de ventas por vendedor.
+     * Todas las ventas (pendientes y completadas) de un usuario en un mes/año determinado,
+     * para el informe de ventas por vendedor. No se filtra por "activo": ese campo indica
+     * si la venta está pendiente de pago (true) o ya completada/pagada (false), no si está eliminada
+     * (la eliminación de ventas es física, ver VentaServiceImpl.deleteById).
      */
-    @Query("SELECT v FROM Venta v WHERE v.activo = true AND v.usuario.id = :usuarioId " +
+    @Query("SELECT v FROM Venta v WHERE v.usuario.id = :usuarioId " +
            "AND YEAR(v.fecha) = :year AND MONTH(v.fecha) = :month ORDER BY v.fecha ASC")
     List<Venta> findByUsuarioAndAnioMes(@Param("usuarioId") Long usuarioId, @Param("year") int year, @Param("month") int month);
 }

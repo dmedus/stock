@@ -3,6 +3,7 @@ package com.stock.entidades.servicio;
 import com.stock.controlador.dto.InformesMesDTO;
 import com.stock.controlador.dto.InformeVentasVendedorDTO;
 import com.stock.controlador.dto.ResumenTipoVentaDTO;
+import com.stock.controlador.dto.VentaResumenVendedorDTO;
 import com.stock.controlador.dto.TopVinoMesDTO;
 import com.stock.controlador.dto.UsuarioResumenMesDTO;
 import com.stock.entidades.Gasto;
@@ -335,22 +336,30 @@ public class InformesServiceImpl implements InformesService {
         dto.setUsuarioNombre(usuario != null ? (usuario.getNombre() + " " + usuario.getApellido()).trim() : null);
 
         List<Venta> ventas = ventaRepository.findByUsuarioAndAnioMes(usuarioId, anio, mes);
-        // Forzar carga de relaciones lazy que se muestran en la vista (cliente y tipo de venta)
-        ventas.forEach(v -> {
-            if (v.getCliente() != null) v.getCliente().getNombre();
-            if (v.getListaPrecio() != null) v.getListaPrecio().getNombre();
-        });
-        dto.setVentas(ventas);
+        ventas.forEach(v -> v.getDetalles().size()); // forzar lazy load
 
-        Map<String, List<Venta>> porTipo = ventas.stream()
-                .collect(Collectors.groupingBy(
-                        v -> v.getListaPrecio() != null ? v.getListaPrecio().getNombre() : "Sin tipo asignado",
-                        LinkedHashMap::new, Collectors.toList()));
+        // El "tipo de venta" es la lista de precio (Mayorista, Minorista, etc.). Venta.listaPrecio
+        // es solo un valor por defecto sin significado real (siempre la primera lista de precio
+        // existente); la lista efectivamente aplicada a cada producto está en VentaDetalle.listaPrecio.
+        // Como una misma venta puede combinar líneas con distintas listas, se asigna a la venta la
+        // lista que concentra el mayor monto (subtotal) entre sus detalles.
+        List<VentaResumenVendedorDTO> filas = ventas.stream()
+                .map(v -> new VentaResumenVendedorDTO(
+                        v.getId(),
+                        v.getFecha(),
+                        v.getCliente() != null ? (v.getCliente().getNombre() + " " + v.getCliente().getApellido()).trim() : "—",
+                        tipoVentaPredominante(v),
+                        v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO))
+                .collect(Collectors.toList());
+        dto.setVentas(filas);
+
+        Map<String, List<VentaResumenVendedorDTO>> porTipo = filas.stream()
+                .collect(Collectors.groupingBy(VentaResumenVendedorDTO::getTipoVenta, LinkedHashMap::new, Collectors.toList()));
 
         List<ResumenTipoVentaDTO> resumenPorTipo = porTipo.entrySet().stream()
                 .map(e -> {
                     BigDecimal totalTipo = e.getValue().stream()
-                            .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+                            .map(VentaResumenVendedorDTO::getTotal)
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
                     return new ResumenTipoVentaDTO(e.getKey(), (long) e.getValue().size(), totalTipo);
                 })
@@ -358,12 +367,29 @@ public class InformesServiceImpl implements InformesService {
                 .collect(Collectors.toList());
         dto.setResumenPorTipo(resumenPorTipo);
 
-        BigDecimal totalGeneral = ventas.stream()
-                .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+        BigDecimal totalGeneral = filas.stream()
+                .map(VentaResumenVendedorDTO::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         dto.setTotalGeneral(totalGeneral);
 
         return dto;
+    }
+
+    /**
+     * Lista de precio que concentra el mayor monto (subtotal) entre los detalles de la venta.
+     * Es la mejor aproximación al "tipo de venta" cuando una venta combina líneas con distintas listas.
+     */
+    private String tipoVentaPredominante(Venta venta) {
+        Map<String, BigDecimal> montoPorTipo = new LinkedHashMap<>();
+        for (VentaDetalle d : venta.getDetalles()) {
+            String nombre = d.getListaPrecio() != null ? d.getListaPrecio().getNombre() : "Sin tipo asignado";
+            BigDecimal sub = d.getSubtotal() != null ? d.getSubtotal() : BigDecimal.ZERO;
+            montoPorTipo.merge(nombre, sub, BigDecimal::add);
+        }
+        return montoPorTipo.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("Sin tipo asignado");
     }
 
     @Override
