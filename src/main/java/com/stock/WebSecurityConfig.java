@@ -63,6 +63,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 				"/js/**",
 				"/css/**",
 				"/img/**",
+				"/manifest.json",
+				"/sw.js",
+				"/offline.html",
 				"/registro").permitAll()
 		.antMatchers("/listarUsuarios", "/usuarioForm/**", "/eliminarUsuario/**").hasRole("ADMIN")
 		.antMatchers("/listarPedidos", "/pedidoForm/**", "/eliminarPedido/**", "/verPedidoDetalles/**", "/confirmarPedido/**", "/pagarPedido/**").hasRole("ADMIN")

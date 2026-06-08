@@ -4,7 +4,9 @@
       "Bash(netstat -ano)",
       "Bash(findstr :8080)",
       "Bash(findstr LISTENING)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(magick --version)",
+      "Bash(convert --version)"
     ]
   }
 }

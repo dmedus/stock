@@ -1,14 +1,18 @@
 package com.stock.entidades.servicio;
 
 import com.stock.controlador.dto.InformesMesDTO;
+import com.stock.controlador.dto.InformeVentasVendedorDTO;
+import com.stock.controlador.dto.ResumenTipoVentaDTO;
 import com.stock.controlador.dto.TopVinoMesDTO;
 import com.stock.controlador.dto.UsuarioResumenMesDTO;
 import com.stock.entidades.Gasto;
+import com.stock.entidades.Usuario;
 import com.stock.entidades.Venta;
 import com.stock.entidades.VentaDetalle;
 import com.stock.entidades.Pago;
 import com.stock.repositorio.GastoRepository;
 import com.stock.repositorio.PagoRepository;
+import com.stock.repositorio.UsuarioRepository;
 import com.stock.repositorio.VentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +40,9 @@ public class InformesServiceImpl implements InformesService {
 
     @Autowired
     private GastoRepository gastoRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -306,6 +313,57 @@ public class InformesServiceImpl implements InformesService {
             return cant * porCaja;
         }
         return cant;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InformeVentasVendedorDTO getInformeVentasVendedor(int anio, int mes, Long usuarioId) {
+        InformeVentasVendedorDTO dto = new InformeVentasVendedorDTO();
+        dto.setAnio(anio);
+        dto.setMes(mes);
+        dto.setNombreMes(NOMBRES_MES[mes]);
+        dto.setUsuarioId(usuarioId);
+
+        if (usuarioId == null) {
+            dto.setVentas(Collections.emptyList());
+            dto.setResumenPorTipo(Collections.emptyList());
+            dto.setTotalGeneral(BigDecimal.ZERO);
+            return dto;
+        }
+
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
+        dto.setUsuarioNombre(usuario != null ? (usuario.getNombre() + " " + usuario.getApellido()).trim() : null);
+
+        List<Venta> ventas = ventaRepository.findByUsuarioAndAnioMes(usuarioId, anio, mes);
+        // Forzar carga de relaciones lazy que se muestran en la vista (cliente y tipo de venta)
+        ventas.forEach(v -> {
+            if (v.getCliente() != null) v.getCliente().getNombre();
+            if (v.getListaPrecio() != null) v.getListaPrecio().getNombre();
+        });
+        dto.setVentas(ventas);
+
+        Map<String, List<Venta>> porTipo = ventas.stream()
+                .collect(Collectors.groupingBy(
+                        v -> v.getListaPrecio() != null ? v.getListaPrecio().getNombre() : "Sin tipo asignado",
+                        LinkedHashMap::new, Collectors.toList()));
+
+        List<ResumenTipoVentaDTO> resumenPorTipo = porTipo.entrySet().stream()
+                .map(e -> {
+                    BigDecimal totalTipo = e.getValue().stream()
+                            .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return new ResumenTipoVentaDTO(e.getKey(), (long) e.getValue().size(), totalTipo);
+                })
+                .sorted((a, b) -> b.getTotal().compareTo(a.getTotal()))
+                .collect(Collectors.toList());
+        dto.setResumenPorTipo(resumenPorTipo);
+
+        BigDecimal totalGeneral = ventas.stream()
+                .map(v -> v.getTotal() != null ? v.getTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        dto.setTotalGeneral(totalGeneral);
+
+        return dto;
     }
 
     @Override

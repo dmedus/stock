@@ -46,4 +46,11 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
      */
     @Query("SELECT DISTINCT YEAR(v.fecha) FROM Venta v WHERE v.activo = true ORDER BY YEAR(v.fecha) DESC")
     List<Object> findAniosConVentas();
+
+    /**
+     * Ventas activas de un usuario en un mes/año determinado, para el informe de ventas por vendedor.
+     */
+    @Query("SELECT v FROM Venta v WHERE v.activo = true AND v.usuario.id = :usuarioId " +
+           "AND YEAR(v.fecha) = :year AND MONTH(v.fecha) = :month ORDER BY v.fecha ASC")
+    List<Venta> findByUsuarioAndAnioMes(@Param("usuarioId") Long usuarioId, @Param("year") int year, @Param("month") int month);
 }

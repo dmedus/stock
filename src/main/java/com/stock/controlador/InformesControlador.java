@@ -1,6 +1,8 @@
 package com.stock.controlador;
 
+import com.stock.entidades.Usuario;
 import com.stock.entidades.servicio.InformesService;
+import com.stock.entidades.servicio.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,12 +13,16 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class InformesControlador {
 
     @Autowired
     private InformesService informesService;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     private static final Map<Integer, String> NOMBRES_MES = new LinkedHashMap<>();
     static {
@@ -57,5 +63,37 @@ public class InformesControlador {
         model.addAttribute("nombresMes", NOMBRES_MES);
 
         return "informes";
+    }
+
+    @GetMapping("/informes/vendedor")
+    public String verInformeVendedor(
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio,
+            @RequestParam(required = false) Long usuarioId,
+            Model model) {
+
+        LocalDate hoy = LocalDate.now();
+        int mesActual  = (mes  != null) ? mes  : hoy.getMonthValue();
+        int anioActual = (anio != null) ? anio : hoy.getYear();
+
+        List<Integer> aniosDisponibles = informesService.getAniosDisponibles();
+        if (!aniosDisponibles.contains(hoy.getYear())) {
+            aniosDisponibles.add(0, hoy.getYear());
+        }
+
+        List<Usuario> vendedores = usuarioService.listarUsuarios().stream()
+                .filter(u -> Boolean.TRUE.equals(u.getActivo()))
+                .collect(Collectors.toList());
+
+        model.addAttribute("titulo", "Ventas por Vendedor");
+        model.addAttribute("informeVendedor", informesService.getInformeVentasVendedor(anioActual, mesActual, usuarioId));
+        model.addAttribute("mesSeleccionado", mesActual);
+        model.addAttribute("anioSeleccionado", anioActual);
+        model.addAttribute("usuarioSeleccionado", usuarioId);
+        model.addAttribute("aniosDisponibles", aniosDisponibles);
+        model.addAttribute("nombresMes", NOMBRES_MES);
+        model.addAttribute("vendedores", vendedores);
+
+        return "informeVentasVendedor";
     }
 }
